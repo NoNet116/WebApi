@@ -1,12 +1,12 @@
 using BLL.Extensions;
 using BLL.Interfaces;
+using BLL.Models;
 using BLL.Services;
 using DAL;
 using DAL.Interfaces;
 using DAL.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
 using WebApi.Mapper;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,8 +25,6 @@ string connection = builder.Configuration.GetConnectionString("DefaultConnection
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(connection));
 
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddIdentity<DAL.Entities.User, IdentityRole>(opts =>
 {
     opts.Password.RequiredLength = 2;
@@ -38,8 +36,9 @@ builder.Services.AddIdentity<DAL.Entities.User, IdentityRole>(opts =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-builder.Services.AddScoped<IRoleService, RoleService>().AddIdentityRoles();
-
+builder.Services.AddScoped<IRoleService, RoleService>().AddIdentityRoles(RoleType.User, RoleType.Administrator);
+builder.Services.AddScoped<IUserService, UserService>().AddDefaultUserRole(RoleType.User); 
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 //End
 var app = builder.Build();

@@ -1,11 +1,10 @@
 ﻿using AutoMapper;
 using BLL.Interfaces;
+using BLL.Models;
 using BLL.ModelsDto;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Reflection.Metadata.Ecma335;
-using System.Xml.Linq;
 
 namespace BLL.Services
 {
@@ -67,6 +66,11 @@ namespace BLL.Services
             {
                 _logger.LogError(NOTFOUNDBYID);
                 return Result<bool>.Fail(NOTFOUNDBYID);
+            }
+            
+            if (role.Name == RoleType.User.ToString() || role.Name == RoleType.Administrator.ToString())
+            {
+                return Result<bool>.Fail("Нельзя удалять роль по умолчанию");
             }
 
             var result = await _roleManager.DeleteAsync(role);

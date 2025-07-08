@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BLL.Interfaces;
+using BLL.Models;
 using BLL.ModelsDto;
 using DAL.Entities;
 using DAL.Interfaces;
@@ -45,14 +46,14 @@ namespace BLL.Services
                 return Result<UserDto>.Fail(createResult.Errors.Select(e => $"{e.Code}. {e.Description}").ToArray());
 
             // Проверяем или создаём роль
-            var roleResult = await _roleService.GetByNameAsync("User");
+            var roleResult = await _roleService.GetByNameAsync(DefaultRoleConfig.DefaultRoleName);
             if (roleResult.Data == null)
             {
-                roleResult = await _roleService.Create("User");
+                roleResult = await _roleService.Create(DefaultRoleConfig.DefaultRoleName);
             }
 
             if (roleResult.Data == null)
-                return Result<UserDto>.Fail("Не удалось создать или получить роль User.");
+                return Result<UserDto>.Fail(string.Format("Не удалось создать или получить роль {0}.", DefaultRoleConfig.DefaultRoleName));
 
             // Добавляем пользователя в роль
             var addToRoleResult = await _userManager.AddToRoleAsync(user, roleResult.Data.Name);

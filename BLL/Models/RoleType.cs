@@ -1,0 +1,13 @@
+﻿using System.ComponentModel;
+
+namespace BLL.Models
+{
+    public enum RoleType
+    {
+        [Description("User")]
+        User,
+        [Description("Administrator")]
+        Administrator
+    }
+   
+}
