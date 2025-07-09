@@ -22,7 +22,7 @@ namespace WebApi.Controllers
         }
 
         
-        [HttpGet]
+        [HttpGet("All")]
         public async Task<IActionResult> GetAll()
         {
             try
@@ -43,10 +43,10 @@ namespace WebApi.Controllers
         public async Task<IActionResult> GetById(string id)
         {
             var result = await _roleService.GetByIdAsync(id);
-            if (result == null)
+            if (result.Data == null)
                 return NotFound();
 
-            var viewModel = _mapper.Map<RoleViewModel>(result);
+            var viewModel = _mapper.Map<RoleViewModel>(result.Data);
             return Ok(viewModel);
         }
 
@@ -62,7 +62,7 @@ namespace WebApi.Controllers
         }
 
 
-        [HttpPost]
+        [HttpPost("Create")]
         public async Task<IActionResult> Create([FromBody] RegisterRoleModel model)
         {
             try
@@ -86,7 +86,7 @@ namespace WebApi.Controllers
         }
 
         
-        [HttpPut]
+        [HttpPut("Update")]
         public async Task<IActionResult> Update([FromBody] RoleViewModel model)
         {
             if (!ModelState.IsValid)

@@ -1,12 +1,14 @@
 ﻿using AutoMapper;
 using BLL.Interfaces;
 using BLL.ModelsDto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.ViewModels;
 
 namespace WebApi.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase 
     {
@@ -18,8 +20,10 @@ namespace WebApi.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet()]
+        [AllowAnonymous]
+        [HttpGet("All")]
         [ProducesResponseType(typeof(IEnumerable<UserViewModel>), StatusCodes.Status200OK)]
+       
         public async Task<IActionResult> GetAll()
         {
             var usersDto = await _userService.GetAllUsersAsync();
@@ -28,6 +32,7 @@ namespace WebApi.Controllers
             return Ok(_mapper.Map<IEnumerable<UserViewModel>>(usersDto));
         }
 
+        
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(UserViewModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -40,7 +45,7 @@ namespace WebApi.Controllers
             return Ok(_mapper.Map<UserViewModel>(user));
         }
 
-        [HttpPost()]
+        [HttpPost("Create")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromBody] RegisterUserModel model)
@@ -59,8 +64,8 @@ namespace WebApi.Controllers
 
             return CreatedAtAction(
                 nameof(GetById),
-                new { id = createdUser.Id }, // Используй реальный ID
-                createdUser // Можно вернуть DTO, если нужно
+                new { id = createdUser.Id }, 
+                createdUser
             );
         }
 
@@ -68,6 +73,7 @@ namespace WebApi.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Delete(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -80,6 +86,25 @@ namespace WebApi.Controllers
                 : BadRequest(result.Errors);
         }
 
+        [HttpGet("me")]
+        [ProducesResponseType(typeof(UserViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("Не удалось определить пользователя.");
+
+            var user = await _userService.GetUserByIdAsync(userId);
+            if (user == null)
+                return NotFound();
+
+            return Ok(_mapper.Map<UserViewModel>(user));
+        }
+
+
 
     }
+
+
 }

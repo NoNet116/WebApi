@@ -6,6 +6,7 @@ using DAL.Entities;
 using DAL.Interfaces;
 using Microsoft.AspNet.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Authentication;
 
 namespace BLL.Services
 {

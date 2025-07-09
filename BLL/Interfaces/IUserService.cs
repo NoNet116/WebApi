@@ -1,4 +1,5 @@
 ﻿using BLL.ModelsDto;
+using DAL.Entities;
 
 namespace BLL.Interfaces
 {
