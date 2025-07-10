@@ -1,14 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DAL.Entities
+namespace BLL.ModelsDto
 {
-    public class Tag
+    public class TagDto
     {
         public Guid Id { get; set; }
 
         [Required]
         [MaxLength(50)]
-        public string Name { get; set; } = null!;
+        public required string Name { get; set; }
 
         [MaxLength(255)]
         public string Description { get; set; } = string.Empty;
@@ -17,8 +17,5 @@ namespace DAL.Entities
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         public string CreatedByUserId { get; set; } = null!;
-        public User CreatedByUser { get; set; } = null!;
-
-
     }
 }

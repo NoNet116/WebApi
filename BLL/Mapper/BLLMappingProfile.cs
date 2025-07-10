@@ -19,6 +19,8 @@ namespace BLL.Mapper
                 .ForMember(dest => dest.Id, opt => opt.Ignore()); // важно, иначе EF будет ругаться
 
             RoleMap();
+
+            TagMap();
         }
 
         void RoleMap()
@@ -30,6 +32,11 @@ namespace BLL.Mapper
             CreateMap<RoleDto, IdentityRole>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name));
+        }
+
+        void TagMap()
+        {
+            CreateMap<Tag, TagDto>().ReverseMap();
         }
     }
 }

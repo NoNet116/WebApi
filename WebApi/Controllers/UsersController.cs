@@ -44,8 +44,8 @@ namespace WebApi.Controllers
 
             return Ok(_mapper.Map<UserViewModel>(user));
         }
-
-        [HttpPost("Create")]
+       
+        [AllowAnonymous, HttpPost("Create")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromBody] RegisterUserModel model)

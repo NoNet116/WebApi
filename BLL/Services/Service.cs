@@ -6,13 +6,11 @@ namespace BLL.Services
 {
     public class Service<T>:IService<T>where T : class
     {
-        private readonly T _value;
         private readonly IMapper _mapper;
         private readonly IRepository<T> _repository;
        
         public Service(T value, IMapper mapper, IRepository<T> repository)
         {
-            _value = value;
             _mapper = mapper;
             _repository = repository;
         }
