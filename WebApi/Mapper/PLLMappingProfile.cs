@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BLL.ModelsDto;
 using WebApi.ViewModels;
+using WebApi.ViewModels.Articles;
 using WebApi.ViewModels.Tags;
 
 namespace WebApi.Mapper
@@ -13,6 +14,7 @@ namespace WebApi.Mapper
 
             RoleMap();
             TagMap();
+            ArticleMap();
         }
 
         void RoleMap()
@@ -28,6 +30,11 @@ namespace WebApi.Mapper
             CreateMap<TagViewModel, TagDto>().ReverseMap();
             CreateMap<RegisterTagModel, TagDto>().ReverseMap();
             CreateMap<UpdateViewModel, TagDto>().ReverseMap();
+        }
+
+        void ArticleMap()
+        {
+            CreateMap<CreateArticleViewModel, ArticleDto>().ReverseMap();
         }
     }
 }

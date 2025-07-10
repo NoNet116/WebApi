@@ -21,6 +21,8 @@ namespace BLL.Mapper
             RoleMap();
 
             TagMap();
+
+            Article();
         }
 
         void RoleMap()
@@ -44,6 +46,20 @@ namespace BLL.Mapper
             CreateMap<TagDto, Tag>()
                 .ForMember(dest => dest.CreatedByUserId, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedByUser, opt => opt.Ignore()); 
+        }
+
+        void Article()
+        {
+            // Mapping из сущности в DTO
+            CreateMap<Article, ArticleDto>()
+                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.UserName)); 
+
+            // Mapping из DTO в сущность
+            CreateMap<ArticleDto, Article>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Author, opt => opt.Ignore());
+
+
         }
     }
 }

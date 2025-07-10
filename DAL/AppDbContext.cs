@@ -9,6 +9,8 @@ namespace DAL
     public class AppDbContext : IdentityDbContext<User>
     {
         public DbSet<Tag> Tags { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Article> Articles { get; set; }
 
         public AppDbContext(Microsoft.EntityFrameworkCore.DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -64,6 +66,31 @@ namespace DAL
 
                 entity.Property(e => e.UpdatedAt)
                     .HasDefaultValueSql("GETDATE()");
+            });
+
+            modelBuilder.Entity<Article>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd(); // Автоинкремент
+
+                // Заменяем GETDATE() на значение по умолчанию
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValue(DateTime.UtcNow);
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValue(DateTime.UtcNow);
+
+            });
+
+            modelBuilder.Entity<Comment>(entity =>
+            {
+                // Заменяем GETDATE() на значение по умолчанию
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValue(DateTime.UtcNow);
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValue(DateTime.UtcNow);
             });
 
         }   }

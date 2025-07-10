@@ -62,6 +62,7 @@ builder.Services.AddScoped<IUserService, UserService>()
     .AddDefaultUserRole(RoleType.User);
 
 builder.Services.AddScoped<ITagService, TagService>();
+builder.Services.AddScoped<IArticleService, ArticleService>();
 // Регистрируем обобщенный репозиторий (generic repository) для работы с сущностями
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
