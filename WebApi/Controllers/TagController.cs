@@ -1,12 +1,9 @@
 ﻿using AutoMapper;
-using BLL;
 using BLL.Interfaces;
 using BLL.ModelsDto;
 using DAL.Entities;
-using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Reflection.Metadata.Ecma335;
 using WebApi.ViewModels.Tags;
 
 namespace WebApi.Controllers
@@ -18,10 +15,13 @@ namespace WebApi.Controllers
     {
         private readonly ITagService _tagService;
         private readonly IMapper _mapper;
+        private readonly IService<Tag, TagDto> _Service;
 
-        public TagController(ITagService tagService, IMapper mapper) {
+        public TagController(ITagService tagService, IMapper mapper, IService<Tag,TagDto> service)
+        {
             _tagService = tagService;
             _mapper = mapper;
+            _Service = service;
         }
         #region Create Tag
 
@@ -52,6 +52,12 @@ namespace WebApi.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _Service.GetAllAsync();
+            return Ok(result);
+        }
         #endregion
 
         #region Update Tag

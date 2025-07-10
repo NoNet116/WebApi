@@ -65,7 +65,7 @@ builder.Services.AddScoped<ITagService, TagService>();
 // Регистрируем обобщенный репозиторий (generic repository) для работы с сущностями
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
-//builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
+builder.Services.AddScoped(typeof(IService<,>), typeof(Service<,>));
 //builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 

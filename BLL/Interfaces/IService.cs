@@ -1,12 +1,11 @@
-﻿
-using System.Linq.Expressions;
-
-
-namespace BLL.Interfaces
+﻿namespace BLL.Interfaces
 {
-    public interface IService<T> where T : class
+    public interface IService<TEntity, TDto>
+    where TEntity : class
+    where TDto : class
     {
-        Task<IEnumerable<T>> GetAllAsync();
-        Task<Result<bool>> CreateAsync(T value);
+        Task<IEnumerable<TDto>> GetAllAsync();
+        Task<Result<TDto>> CreateAsync(TDto dto);
     }
+
 }
