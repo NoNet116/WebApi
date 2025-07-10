@@ -39,5 +39,12 @@ namespace WebApi.Controllers
 
             return StatusCode(result.StatusCode, result);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> FindByTitle(string? title)
+        {
+            var res = await _articleService.FindByTitleAsync(title);
+            return StatusCode(res.StatusCode, res);
+        }
     }
 }

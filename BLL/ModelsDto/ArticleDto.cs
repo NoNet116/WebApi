@@ -12,10 +12,7 @@ namespace BLL.ModelsDto
         public required string AuthorId { get; set; }
         public string AuthorName { get; set; } = null!;
 
-        // Для тегов можно использовать:
-        public List<TagDto> Tags { get; set; } = new List<TagDto>();
-
-        // Для комментариев:
-        public List<CommentDto> Comments { get; set; } = new List<CommentDto>();
+        public int TagsCount { get; set; } 
+        public int CommentsCount { get; set; } 
     }
 }

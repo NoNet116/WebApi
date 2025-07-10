@@ -6,5 +6,6 @@ namespace BLL.Interfaces
     public interface IArticleService
     {
         Task<Result<ArticleDto>> CreateAsync(ArticleDto dto);
+        Task<Result<IEnumerable<ArticleDto>>> FindByTitleAsync(string? title = null);
     }
 }
