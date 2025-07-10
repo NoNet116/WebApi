@@ -44,5 +44,25 @@ namespace BLL.Services
                 return Result<bool>.Fail(ex.Message);
             }
         }
+                
+        public async Task<Result<IEnumerable<TagDto>>> FindByNameAsync(string? name = null)
+        {
+            try
+            {
+                var result = await _repository.GetAllAsync();
+
+                if (!string.IsNullOrEmpty(name))
+                {
+                    result = result.Where(n => n.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+                }
+                var dto = _mapper.Map<IEnumerable<TagDto>>(result);
+
+                return Result<IEnumerable<TagDto>>.Ok(dto);
+            }
+            catch (Exception ex)
+            {
+                return Result<IEnumerable<TagDto>>.Fail(ex.Message);
+            }
+        }
     }
 }
