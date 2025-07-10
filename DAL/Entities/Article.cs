@@ -5,14 +5,14 @@
         public int Id { get; set; }
         public string Title { get; set; } = default!;
         public string Content { get; set; } = default!;
+        public string DescriptionEntity { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         public string AuthorId { get; set; } = default!;
-        public User Author { get; set; } = default!; // Навигационное свойство
-        public Tag? Tag { get; set; } = default!; // Навигационное свойство
+        public User Author { get; set; } = default!;
 
-        public ICollection<Tag> Tags = new List<Tag>();
-        public ICollection<Comment> Comments = new List<Comment>();
+        public ICollection<ArticleTags> ArticleTags { get; set; } = new List<ArticleTags>();
+
     }
 }

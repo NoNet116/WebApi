@@ -11,6 +11,7 @@ namespace DAL
         public DbSet<Tag> Tags { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Article> Articles { get; set; }
+        public DbSet<ArticleTags> ArticleTags { get; set; }
 
         public AppDbContext(Microsoft.EntityFrameworkCore.DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -62,10 +63,10 @@ namespace DAL
                     .HasMaxLength(255);
 
                 entity.Property(e => e.CreatedAt)
-                    .HasDefaultValueSql("GETDATE()");
+                    .HasDefaultValue(DateTime.UtcNow);
 
                 entity.Property(e => e.UpdatedAt)
-                    .HasDefaultValueSql("GETDATE()");
+                    .HasDefaultValue(DateTime.UtcNow);
             });
 
             modelBuilder.Entity<Article>(entity =>
@@ -93,5 +94,22 @@ namespace DAL
                     .HasDefaultValue(DateTime.UtcNow);
             });
 
-        }   }
+            #region ArticleTag
+            modelBuilder.Entity<ArticleTags>()
+        .HasKey(at => new { at.ArticleId, at.TagId });
+
+            // Настройка связей
+            modelBuilder.Entity<ArticleTags>()
+                .HasOne(at => at.Article)
+                .WithMany(a => a.ArticleTags)
+                .HasForeignKey(at => at.ArticleId);
+
+            modelBuilder.Entity<ArticleTags>()
+                .HasOne(at => at.Tag)
+                .WithMany(t => t.ArticleTags)
+                .HasForeignKey(at => at.TagId);
+            #endregion
+
+        }
+    }
 }

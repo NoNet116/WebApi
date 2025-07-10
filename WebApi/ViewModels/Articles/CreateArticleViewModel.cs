@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BLL.ModelsDto;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace WebApi.ViewModels.Articles
@@ -11,6 +12,6 @@ namespace WebApi.ViewModels.Articles
         public required string Content { get; set; }
 
         [MaxLength(10)]
-        public IEnumerable<string>? Tags { get; set; }
+        public List<string>? Tags { get; set; }
     }
 }

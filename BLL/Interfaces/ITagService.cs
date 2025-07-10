@@ -1,4 +1,5 @@
 ﻿using BLL.ModelsDto;
+using DAL.Entities;
 using System.Security.Claims;
 
 namespace BLL.Interfaces
@@ -10,5 +11,7 @@ namespace BLL.Interfaces
         Task<Result<TagDto>> FindByIdAsync(Guid id);
         Task<Result<TagDto>> UpdateAsync(TagDto updDto);
         Task<Result<bool>> DeleteAsync(Guid id);
+        internal Task<Tag?> FirstOrDefaultEntityAsync(string name);
+        Task<IEnumerable<Tag>> GetExistingTagsAsync(IEnumerable<string> tagNames);
     }
 }

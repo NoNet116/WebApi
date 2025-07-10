@@ -11,78 +11,125 @@ namespace BLL.Services
 {
     public class ArticleService : IArticleService, IBaseService<Article, ArticleDto>
     {
-        private readonly IRepository<Article> _repository;
+        private readonly IRepository<Article> _articleRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<ArticleService> _logger;
         private readonly IUserService _userService;
+        private readonly ITagService _tagService;
 
-        public ArticleService(IRepository<Article> repository, IMapper mapper, ILogger<ArticleService> logger, IUserService userService)
+        public ArticleService(IRepository<Article> repository, IMapper mapper, ILogger<ArticleService> logger, IUserService userService, ITagService tagService)
         {
-            _repository = repository;
+            _articleRepository = repository;
             _mapper = mapper;
             _logger = logger;
             _userService = userService;
+            _tagService = tagService;
         }
 
-        private Result<ArticleDto>? IsVaild(ArticleDto dto)
+        #region Create
+        private Result<ArticleDto>? ValidateArticleDto(ArticleDto dto)
         {
-            if (string.IsNullOrEmpty(dto.Content))
-                return Result<ArticleDto>.Fail(400, "Не задано содержание");
+            if (string.IsNullOrWhiteSpace(dto.Content))
+                return Result<ArticleDto>.Fail(400, "Содержание статьи не может быть пустым");
 
-            if (string.IsNullOrEmpty(dto.Title))
-                return Result<ArticleDto>.Fail(400, "Не задан заголовок");
+            if (string.IsNullOrWhiteSpace(dto.Title))
+                return Result<ArticleDto>.Fail(400, "Заголовок статьи не может быть пустым");
+
+            if (string.IsNullOrWhiteSpace(dto.AuthorId))
+                return Result<ArticleDto>.Fail(400, "Не указан автор статьи");
 
             return null;
         }
 
-        #region Create
-        public async  Task<Result<ArticleDto>> CreateAsync(ArticleDto dto)
+        public async Task<Result<ArticleDto>> CreateAsync(ArticleDto dto)
         {
-            var dtovalid = IsVaild(dto);
-            if (dtovalid != null)
-                return dtovalid;
+            // Валидация DTO
+            if (string.IsNullOrWhiteSpace(dto.Title))
+                return Result<ArticleDto>.Fail(400, "Заголовок статьи обязателен");
 
+            if (string.IsNullOrWhiteSpace(dto.Content))
+                return Result<ArticleDto>.Fail(400, "Содержание статьи обязательно");
+
+            if (string.IsNullOrWhiteSpace(dto.AuthorId))
+                return Result<ArticleDto>.Fail(400, "Не указан автор статьи");
 
             try
             {
+                // Проверка существования пользователя
+                var userExists = await _userService.GetUserByIdAsync(dto.AuthorId);
+                if (userExists == null)
+                    return Result<ArticleDto>.Fail(404, "Пользователь не найден");
 
-                var userDto = await _userService.GetUserByIdAsync(dto.AuthorId);
+                // Получение тегов (оптимизированная версия)
+                var tags = new List<Tag>();
+                if (dto.Tags != null && dto.Tags.Any())
+                {
+                    var existingTags = await _tagService.GetExistingTagsAsync(dto.Tags);
+                    var notFoundTags = dto.Tags.Except(existingTags.Select(t => t.Name));
 
-                if (userDto == null)
-                    return Result<ArticleDto>.Fail(404, "User not found.");
+                    if (notFoundTags.Any())
+                        return Result<ArticleDto>.Fail(404, $"Теги не найдены: {string.Join(", ", notFoundTags)}");
 
-                var entity = _mapper.Map<Article>(dto);
+                    tags.AddRange(existingTags);
+                }
 
-                await _repository.AddAsync(entity);
+                // Маппинг и сохранение
+                var article = new Article
+                {
+                    Title = dto.Title,
+                    Content = dto.Content,
+                    DescriptionEntity = dto.DescriptionDto ?? string.Empty,
+                    AuthorId = dto.AuthorId,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    ArticleTags = tags.Select(t => new ArticleTags { TagId = t.Id }).ToList()
+                };
 
-                return Result<ArticleDto>.Ok(201, null);
+                await _articleRepository.AddAsync(article);
+
+                // Маппинг результата
+                var resultDto = new ArticleDto
+                {
+                    Id = article.Id,
+                    Title = article.Title,
+                    Content = article.Content,
+                    DescriptionDto = article.DescriptionEntity,
+                    CreatedAt = article.CreatedAt,
+                    UpdatedAt = article.UpdatedAt,
+                    AuthorId = article.AuthorId,
+                    TagsCount = tags.Count,
+                    //Tags = tags.Select(t => new TagDto { Id = t.Id, Name = t.Name }).ToList()
+                    Tags = tags.Select(t => t.Name).ToList()
+                };
+
+                return Result<ArticleDto>.Ok(201, resultDto);
             }
             catch (Exception ex)
             {
-                var detailedMessage = ex.InnerException?.Message ?? ex.Message;
-
-                return Result<ArticleDto>.Fail(500, detailedMessage);
+                _logger.LogError(ex, "Ошибка при создании статьи. DTO: {@Dto}", dto);
+                return Result<ArticleDto>.Fail(500, "Не удалось создать статью");
             }
         }
-        #endregion
+    
+        
+#endregion
 
         #region Find
         public async Task<Result<IEnumerable<ArticleDto>>> FindByTitleAsync(string? title = null)
         {
 
-            var query = _repository.GetQueryable()
+            var query = _articleRepository.GetQueryable()
             .Include(a => a.Author)
             .Select(a => new ArticleDto
             {
+                
                 Id = a.Id,
                 Title = a.Title,
                 Content = a.Content,
                 CreatedAt = a.CreatedAt,
                 UpdatedAt = a.UpdatedAt,
                 AuthorId = a.AuthorId,
-                AuthorName = a.Author.UserName,
-                TagsCount = a.Tags.Count,
-                CommentsCount = a.Comments.Count,
+                AuthorName = a.Author.UserName
                 // Остальные свойства
             });
 

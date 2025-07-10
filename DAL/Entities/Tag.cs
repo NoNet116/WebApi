@@ -19,6 +19,7 @@ namespace DAL.Entities
         public string CreatedByUserId { get; set; } = null!;
         public User CreatedByUser { get; set; } = null!;
 
+        public ICollection<ArticleTags> ArticleTags { get; set; } = new List<ArticleTags>();
 
     }
 }

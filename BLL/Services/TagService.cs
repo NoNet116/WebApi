@@ -4,6 +4,7 @@ using BLL.ModelsDto;
 using DAL.Entities;
 using DAL.Interfaces;
 using Microsoft.AspNet.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 
@@ -140,5 +141,28 @@ namespace BLL.Services
             return Result<bool>.Ok(204,true);
 
         }
+
+        public async Task<Tag?> FirstOrDefaultEntityAsync(string name) => 
+            string.IsNullOrEmpty(name)? null : await _repository.FirstOrDefaultAsync(n => n.Name == name);
+
+        public async Task<IEnumerable<Tag>> GetExistingTagsAsync(IEnumerable<string> tagNames)
+        {
+            if (tagNames == null || !tagNames.Any())
+                return Enumerable.Empty<Tag>();
+
+            try
+            {
+                return await _repository.GetQueryable()
+                    .Where(t => tagNames.Contains(t.Name))
+                    .AsNoTracking()
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при поиске тегов по именам: {TagNames}", tagNames);
+                throw;
+            }
+        }
+
     }
 }
