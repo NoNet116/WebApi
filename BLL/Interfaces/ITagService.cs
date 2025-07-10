@@ -7,5 +7,6 @@ namespace BLL.Interfaces
     {
         Task<Result<bool>> CreateAsync(TagDto tagDto, ClaimsPrincipal user);
         Task<Result<IEnumerable<TagDto>>> FindByNameAsync(string? name = null);
+        Task<Result<TagDto>> FindByIdAsync(Guid id);
     }
 }

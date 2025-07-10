@@ -56,12 +56,28 @@ namespace BLL.Services
                     result = result.Where(n => n.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
                 }
                 var dto = _mapper.Map<IEnumerable<TagDto>>(result);
-
+               
                 return Result<IEnumerable<TagDto>>.Ok(dto);
             }
             catch (Exception ex)
             {
                 return Result<IEnumerable<TagDto>>.Fail(ex.Message);
+            }
+        }
+
+        public async Task<Result<TagDto>> FindByIdAsync(Guid id)
+        {
+            try
+            {
+                ArgumentNullException.ThrowIfNullOrEmpty("The id user must not be null");
+                
+                var result = await _repository.GetByIdAsync(id);
+                var dto = _mapper.Map<TagDto>(result);
+                return Result<TagDto>.Ok(dto);
+            }
+            catch (Exception ex)
+            {
+                return Result<TagDto>.Fail(ex.Message);
             }
         }
     }
