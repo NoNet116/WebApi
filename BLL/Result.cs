@@ -17,15 +17,17 @@
     {
         public bool Success { get; set; }
         public T? Data { get; set; }
+        public int StatusCode { get; set; }
         public List<string> Errors { get; set; } = new();
 
-        public static Result<T> Ok(T data) =>
-            new() { Success = true, Data = data.NullIfEmpty() };
+        public static Result<T> Ok(int statuscode, T data) =>
+            new() { Success = true, StatusCode = statuscode, Data = data.NullIfEmpty() };
 
-        public static Result<T> Fail(params string[] errors) =>
-            new() { Success = false, Errors = errors.ToList() };
+        public static Result<T> Fail(int statuscode, params string[] errors) =>
+            new() { Success = false, StatusCode = statuscode, Errors = errors.ToList() };
 
         public bool DataIsNull => Data == null;
+
         
        
     }

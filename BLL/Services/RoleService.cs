@@ -29,7 +29,7 @@ namespace BLL.Services
             {
                 var msg = "Имя роли не может быть пустым.";
                 _logger.LogError(msg);
-                return Result<RoleDto>.Fail(msg);
+                return Result<RoleDto>.Fail(201, msg);
             }
 
             var roleExists = await _roleManager.RoleExistsAsync(name);
@@ -37,7 +37,7 @@ namespace BLL.Services
             {
                 var msg = "Роль с таким именем уже существует.";
                 _logger.LogError(msg);
-                return Result<RoleDto>.Fail(msg);
+                return Result<RoleDto>.Fail(418,msg);
             }
 
             var identityRole = new IdentityRole(name);
@@ -48,12 +48,12 @@ namespace BLL.Services
             {
                 var msg = result.Errors.Select(e => e.Description).ToArray();
                 _logger.LogError( string.Join("\n", msg));
-                Result<RoleDto>.Fail(msg);
+                Result<RoleDto>.Fail(500,msg);
             }
 
             string message = $"Создана роль: {name}";
             _logger.LogInformation(message);
-            return Result<RoleDto>.Ok(_mapper.Map<RoleDto>(identityRole));
+            return Result<RoleDto>.Ok(201, _mapper.Map<RoleDto>(identityRole));
             
         }
 
@@ -65,12 +65,12 @@ namespace BLL.Services
             if (role == null)
             {
                 _logger.LogError(NOTFOUNDBYID);
-                return Result<bool>.Fail(NOTFOUNDBYID);
+                return Result<bool>.Fail(401, NOTFOUNDBYID);
             }
             
             if (role.Name == RoleType.User.ToString() || role.Name == RoleType.Administrator.ToString())
             {
-                return Result<bool>.Fail("Нельзя удалять роль по умолчанию");
+                return Result<bool>.Fail(418, "Нельзя удалять роль по умолчанию");
             }
 
             var result = await _roleManager.DeleteAsync(role);
@@ -79,11 +79,11 @@ namespace BLL.Services
             {
                 var msg = result.Errors.Select(e => e.Description).ToArray();
                 _logger.LogError(string.Join("\n", msg));
-                Result<RoleDto>.Fail(msg);
+                Result<RoleDto>.Fail(500, msg);
             }
             string message = $"Удалена роль: {role.Name}";
             _logger.LogInformation(message);
-            return Result<bool>.Ok(true);
+            return Result<bool>.Ok(204, true);
         }
 
         public async Task<IEnumerable<RoleDto>> GetAllAsync()
@@ -109,9 +109,9 @@ namespace BLL.Services
             if (role == null)
             {
                 _logger.LogError(notFoundBy);
-                Result<RoleDto>.Fail(notFoundBy);
+                Result<RoleDto>.Fail(404, notFoundBy);
             }
-            return Result<RoleDto>.Ok(_mapper.Map<RoleDto>(role));
+            return Result<RoleDto>.Ok(200, _mapper.Map<RoleDto>(role));
         }
 
         public async Task<Result<RoleDto>> UpdateAsync(RoleDto roleDto)
@@ -120,21 +120,21 @@ namespace BLL.Services
             {
                 var msg = "Id не может быть пустым.";
                 _logger.LogError(msg);
-                return Result<RoleDto>.Fail(msg);
+                return Result<RoleDto>.Fail(400, msg);
             }
 
             var role = await _roleManager.FindByIdAsync(roleDto.Id);
             if (role == null)
             {
                 _logger.LogError(NOTFOUNDBYID);
-                return Result<RoleDto>.Fail(NOTFOUNDBYID); 
+                return Result<RoleDto>.Fail(404,NOTFOUNDBYID); 
             }
 
             if (string.IsNullOrWhiteSpace(roleDto.Name))
             {
                 var msg = "Имя роли не может быть пустым.";
                 _logger.LogError(msg);
-                return Result<RoleDto>.Fail(msg); ;
+                return Result<RoleDto>.Fail(400, msg); ;
             }
 
             var oldname = role.Name;
@@ -142,13 +142,13 @@ namespace BLL.Services
             var result = await _roleManager.UpdateAsync(role);
 
             if (!result.Succeeded)
-                return Result<RoleDto>.Fail(result.Errors.Select(e => e.Description).ToArray());
+                return Result<RoleDto>.Fail(500, result.Errors.Select(e => e.Description).ToArray());
             
 
             string message = $"Изменена роль: {oldname} => {roleDto.Name}";
             _logger.LogInformation(message);
 
-            return Result<RoleDto>.Ok(_mapper.Map<RoleDto>(role));
+            return Result<RoleDto>.Ok(200, _mapper.Map<RoleDto>(role));
         }
 
         public async Task<Result<IEnumerable<RoleDto>>> GetByNamesAsync(string name)
@@ -156,7 +156,7 @@ namespace BLL.Services
             // Проверяем, что строка не пустая
             if (string.IsNullOrWhiteSpace(name))
             {
-                return Result<IEnumerable<RoleDto>>.Fail("Имя роли не может быть пустым.");
+                return Result<IEnumerable<RoleDto>>.Fail(400,"Имя роли не может быть пустым.");
             }
 
             var allroles = await _roleManager.Roles.ToListAsync();
@@ -168,12 +168,12 @@ namespace BLL.Services
             // Если ничего не найдено
             if (!roles.Any())
             {
-                return Result<IEnumerable<RoleDto>>.Fail("Роли с таким именем не найдены.");
+                return Result<IEnumerable<RoleDto>>.Fail(404, "Роли с таким именем не найдены.");
             }
 
             var dto = _mapper.Map<IEnumerable<RoleDto>>(roles);
 
-            return Result<IEnumerable<RoleDto>>.Ok(dto);
+            return Result<IEnumerable<RoleDto>>.Ok(200, dto);
         }
 
     }

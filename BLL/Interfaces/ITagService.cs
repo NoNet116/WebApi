@@ -8,5 +8,7 @@ namespace BLL.Interfaces
         Task<Result<bool>> CreateAsync(TagDto tagDto, ClaimsPrincipal user);
         Task<Result<IEnumerable<TagDto>>> FindByNameAsync(string? name = null);
         Task<Result<TagDto>> FindByIdAsync(Guid id);
+        Task<Result<TagDto>> UpdateAsync(TagDto updDto);
+        Task<Result<bool>> DeleteAsync(Guid id);
     }
 }

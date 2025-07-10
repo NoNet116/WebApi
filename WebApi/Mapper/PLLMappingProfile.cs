@@ -27,6 +27,7 @@ namespace WebApi.Mapper
         {
             CreateMap<TagViewModel, TagDto>().ReverseMap();
             CreateMap<RegisterTagModel, TagDto>().ReverseMap();
+            CreateMap<UpdateViewModel, TagDto>().ReverseMap();
         }
     }
 }

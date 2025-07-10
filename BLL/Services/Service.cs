@@ -30,11 +30,11 @@ namespace BLL.Services
                 var entity = _mapper.Map<T>(value);
                 await _repository.AddAsync(entity);
                 
-                return Result<bool>.Ok(true);
+                return Result<bool>.Ok(201, true);
             }
             catch (Exception ex)
             {
-                return Result<bool>.Fail(ex.Message);
+                return Result<bool>.Fail(500, ex.Message);
             }
         }
 

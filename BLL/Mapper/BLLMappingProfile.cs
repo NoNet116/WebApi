@@ -36,7 +36,14 @@ namespace BLL.Mapper
 
         void TagMap()
         {
-            CreateMap<Tag, TagDto>().ReverseMap();
+            // Из Entity → в DTO
+            CreateMap<Tag, TagDto>()
+                .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.CreatedByUser.UserName));
+
+            // Из DTO → в Entity
+            CreateMap<TagDto, Tag>()
+                .ForMember(dest => dest.CreatedByUserId, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedByUser, opt => opt.Ignore()); 
         }
     }
 }

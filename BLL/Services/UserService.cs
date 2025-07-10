@@ -44,7 +44,7 @@ namespace BLL.Services
             var createResult = await _userManager.CreateAsync(user, userDto.Password);
 
             if (!createResult.Succeeded)
-                return Result<UserDto>.Fail(createResult.Errors.Select(e => $"{e.Code}. {e.Description}").ToArray());
+                return Result<UserDto>.Fail(500, createResult.Errors.Select(e => $"{e.Code}. {e.Description}").ToArray());
 
             // Проверяем или создаём роль
             var roleResult = await _roleService.GetByNameAsync(DefaultRoleConfig.DefaultRoleName);
@@ -54,15 +54,15 @@ namespace BLL.Services
             }
 
             if (roleResult.Data == null)
-                return Result<UserDto>.Fail(string.Format("Не удалось создать или получить роль {0}.", DefaultRoleConfig.DefaultRoleName));
+                return Result<UserDto>.Fail(500, string.Format("Не удалось создать или получить роль {0}.", DefaultRoleConfig.DefaultRoleName));
 
             // Добавляем пользователя в роль
             var addToRoleResult = await _userManager.AddToRoleAsync(user, roleResult.Data.Name);
             if (!addToRoleResult.Succeeded)
-                return Result<UserDto>.Fail(addToRoleResult.Errors.Select(e => $"{e.Code}. {e.Description}").ToArray());
+                return Result<UserDto>.Fail(500, addToRoleResult.Errors.Select(e => $"{e.Code}. {e.Description}").ToArray());
 
             var dto = _mapper.Map<UserDto>(user);
-            return Result<UserDto>.Ok(dto);
+            return Result<UserDto>.Ok(201, dto);
 
         }
 
@@ -73,13 +73,13 @@ namespace BLL.Services
             var userEntity = await _userManager.FindByIdAsync(id);
 
             if (userEntity == null)
-                return Result<bool>.Fail("Пользователь с указанным ID не найден.");
+                return Result<bool>.Fail(404,"Пользователь с указанным ID не найден.");
 
             var result = await _userManager.DeleteAsync(userEntity);
 
             return result.Succeeded
-                ? Result<bool>.Ok(true)
-                : Result<bool>.Fail(result.Errors.Select(e => e.Code + ". " + e.Description).ToArray());
+                ? Result<bool>.Ok(204, true)
+                : Result<bool>.Fail(500, result.Errors.Select(e => e.Code + ". " + e.Description).ToArray());
         }
 
         public async Task<Result<IEnumerable<UserDto>>> GetUsersAsync(string? searchuser)
@@ -92,11 +92,11 @@ namespace BLL.Services
                 .Contains(searchuser, StringComparison.CurrentCultureIgnoreCase)).ToList();
 
                 var dto = _mapper.Map<IEnumerable<UserDto>>(users);
-                return Result<IEnumerable<UserDto>>.Ok(dto);
+                return Result<IEnumerable<UserDto>>.Ok(200, dto);
             }
             catch (Exception ex)
             {
-                return Result<IEnumerable<UserDto>>.Fail(ex.Message);
+                return Result<IEnumerable<UserDto>>.Fail(500, ex.Message);
             }
         }
 
