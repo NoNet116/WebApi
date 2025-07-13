@@ -27,19 +27,7 @@ namespace BLL.Services
         }
 
         #region Create
-        private Result<ArticleDto>? ValidateArticleDto(ArticleDto dto)
-        {
-            if (string.IsNullOrWhiteSpace(dto.Content))
-                return Result<ArticleDto>.Fail(400, "Содержание статьи не может быть пустым");
-
-            if (string.IsNullOrWhiteSpace(dto.Title))
-                return Result<ArticleDto>.Fail(400, "Заголовок статьи не может быть пустым");
-
-            if (string.IsNullOrWhiteSpace(dto.AuthorId))
-                return Result<ArticleDto>.Fail(400, "Не указан автор статьи");
-
-            return null;
-        }
+       
 
         public async Task<Result<ArticleDto>> CreateAsync(ArticleDto dto)
         {
@@ -178,5 +166,43 @@ namespace BLL.Services
 
         }
         #endregion
+
+
+        public async Task<Result<IEnumerable<ArticleDto>>> GetLatestArticlesAsync(int count = 10)
+        {
+            try
+            {
+                var articles = await _articleRepository.GetQueryable()
+                    .Include(a => a.Author)              // Загружаем автора
+                //    .Include(a => a.ArticleTags)         // Загружаем связи с тегами
+                //    .ThenInclude(at => at.Tag)       // Загружаем сами теги
+                  //  .Include(a => a.Comments)           // Загружаем комментарии
+                    .OrderByDescending(a => a.CreatedAt) // Сортируем по дате создания (новые сначала)
+                    .Take(count)                        // Берем только указанное количество
+                    .AsNoTracking()                     // Для read-only операций
+                    .ToListAsync();
+
+                var result = articles.Select(a => new ArticleDto
+                {
+                    Id = a.Id,
+                    Title = a.Title,
+                    Content = a.Content,
+                    CreatedAt = a.CreatedAt,
+                    UpdatedAt = a.UpdatedAt,
+                    AuthorId = a.AuthorId,
+                    AuthorName = a.Author.UserName,
+                    TagsCount = a.ArticleTags.Count,
+                    CommentsCount = a.Comments.Count,
+                    Tags = (List<string>)a.ArticleTags.Select(at => at.Tag.Name)
+                });
+
+                return Result<IEnumerable<ArticleDto>>.Ok(200, result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при получении последних статей");
+                return Result<IEnumerable<ArticleDto>>.Fail(500, "Не удалось загрузить статьи");
+            }
+        }
     }
 }

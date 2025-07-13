@@ -13,6 +13,7 @@
         public User Author { get; set; } = default!;
 
         public ICollection<ArticleTags> ArticleTags { get; set; } = new List<ArticleTags>();
+        public ICollection<ArticleTags> Comments { get; set; } = new List<ArticleTags>();
 
     }
 }

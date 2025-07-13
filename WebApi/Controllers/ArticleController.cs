@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BLL;
 using BLL.Interfaces;
 using BLL.ModelsDto;
 using Microsoft.AspNet.Identity;
@@ -47,5 +48,12 @@ namespace WebApi.Controllers
             return StatusCode(res.StatusCode, res);
         }
 
+        
+        [HttpGet("{count}")]
+        public async Task<IActionResult> Get (int count)
+        {
+            var res = await _articleService.GetLatestArticlesAsync(count);
+            return StatusCode(res.StatusCode, res);
+        }
     }
 }
