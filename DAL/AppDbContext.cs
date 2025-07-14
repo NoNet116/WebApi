@@ -95,19 +95,22 @@ namespace DAL
             });
 
             #region ArticleTag
-            modelBuilder.Entity<ArticleTags>()
-        .HasKey(at => new { at.ArticleId, at.TagId });
+            modelBuilder.Entity<ArticleTags>(entity =>
+            {
+                entity.ToTable("ArticleTags");
+                entity.HasKey(at => new { at.ArticleId, at.TagId });
 
-            // Настройка связей
-            modelBuilder.Entity<ArticleTags>()
-                .HasOne(at => at.Article)
-                .WithMany(a => a.ArticleTags)
-                .HasForeignKey(at => at.ArticleId);
+                entity.HasOne(at => at.Article)
+                    .WithMany(a => a.ArticleTags)  // Связь только с одной коллекцией
+                    .HasForeignKey(at => at.ArticleId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<ArticleTags>()
-                .HasOne(at => at.Tag)
-                .WithMany(t => t.ArticleTags)
-                .HasForeignKey(at => at.TagId);
+                entity.HasOne(at => at.Tag)
+                    .WithMany(t => t.ArticleTags)
+                    .HasForeignKey(at => at.TagId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+            });
             #endregion
 
         }

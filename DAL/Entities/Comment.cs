@@ -15,5 +15,6 @@ namespace DAL.Entities
         public required Article Article { get; set; }
         [Required]
         public required User Author { get; set; }
+
     }
 }

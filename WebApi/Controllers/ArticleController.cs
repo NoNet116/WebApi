@@ -40,6 +40,18 @@ namespace WebApi.Controllers
 
             return StatusCode(result.StatusCode, result);
         }
+        [HttpPost("Create2")]
+        public async Task<IActionResult> Create2([FromBody] CreateArticleViewModel model)
+        {
+            var dto = _mapper.Map<ArticleDto>(model);
+            dto.AuthorId = User.Identity.GetUserId();
+            var result = await _articleService.CreateAsync2(dto);
+            if (!result.Success)
+                return StatusCode(result.StatusCode, string.Join("\n \r", result.Errors));
+
+            return StatusCode(result.StatusCode, result);
+
+        }
 
         [HttpGet]
         public async Task<IActionResult> FindByTitle(string? title)

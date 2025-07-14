@@ -16,14 +16,17 @@ namespace BLL.Services
         private readonly ILogger<ArticleService> _logger;
         private readonly IUserService _userService;
         private readonly ITagService _tagService;
+        private readonly IArticleTagService _articleTagService;
 
-        public ArticleService(IRepository<Article> repository, IMapper mapper, ILogger<ArticleService> logger, IUserService userService, ITagService tagService)
+        public ArticleService(IRepository<Article> repository, IMapper mapper, ILogger<ArticleService> logger, IUserService userService, ITagService tagService, IArticleTagService IArticleTagService)
         {
             _articleRepository = repository;
             _mapper = mapper;
             _logger = logger;
             _userService = userService;
             _tagService = tagService;
+            _articleTagService = IArticleTagService;
+
         }
 
         #region Create
@@ -98,9 +101,93 @@ namespace BLL.Services
                 return Result<ArticleDto>.Fail(500, "Не удалось создать статью");
             }
         }
-    
-        
-#endregion
+
+        public async Task<Result<ArticleDto>> CreateAsync2(ArticleDto dto)
+        {
+            #region Валидация DTO
+            if (string.IsNullOrWhiteSpace(dto.Title))
+                return Result<ArticleDto>.Fail(400, "Заголовок статьи обязателен");
+
+            if (string.IsNullOrWhiteSpace(dto.Content))
+                return Result<ArticleDto>.Fail(400, "Содержание статьи обязательно");
+
+            if (string.IsNullOrWhiteSpace(dto.AuthorId))
+                return Result<ArticleDto>.Fail(400, "Не указан автор статьи");
+            #endregion
+
+            try
+            {
+                #region Проверка автора
+                var authorExists = await _userService.GetUserByIdAsync(dto.AuthorId) != null;
+                if (!authorExists)
+                    return Result<ArticleDto>.Fail(404, "Автор не найден");
+                #endregion
+
+                #region Получение тегов
+                var tags = new List<Tag>();
+                if (dto.Tags != null && dto.Tags.Any())
+                {
+                    var existingTags = await _tagService.GetExistingTagsAsync(dto.Tags);
+                    var notFoundTags = dto.Tags.Except(existingTags.Select(t => t.Name));
+
+                    if (notFoundTags.Any())
+                        return Result<ArticleDto>.Fail(404, $"Теги не найдены: {string.Join(", ", notFoundTags)}");
+
+                    tags.AddRange(existingTags);
+                }
+                #endregion
+
+                // Создание статьи
+                var article = new Article
+                {
+                    Title = dto.Title,
+                    Content = dto.Content,
+                    DescriptionEntity = dto.DescriptionDto ?? string.Empty,
+                    AuthorId = dto.AuthorId,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                await _articleRepository.AddAsync(article);
+
+                #region Создание связей с тегами
+                if (tags.Any())
+                {
+                    var tagTasks = tags.Select(tag =>
+                        _articleTagService.CreateAsync(new ArticleTagCreateDto
+                        {
+                            TagId = tag.Id,
+                            ArticleId = article.Id // Исправлено: используем ID созданной статьи
+                        }));
+
+                    await Task.WhenAll(tagTasks);
+                }
+                #endregion
+
+                // Маппинг результата
+                var resultDto = new ArticleDto
+                {
+                    Id = article.Id,
+                    Title = article.Title,
+                    Content = article.Content,
+                    DescriptionDto = article.DescriptionEntity,
+                    CreatedAt = article.CreatedAt,
+                    UpdatedAt = article.UpdatedAt,
+                    AuthorId = article.AuthorId,
+                    TagsCount = tags.Count,
+                    Tags = tags.Select(t => t.Name ).ToList()
+                };
+
+                return Result<ArticleDto>.Ok(201, resultDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при создании статьи");
+                return Result<ArticleDto>.Fail(500, "Не удалось создать статью");
+            }
+        }
+
+        #endregion
 
         #region Find
         public async Task<Result<IEnumerable<ArticleDto>>> FindByTitleAsync(string? title = null)
