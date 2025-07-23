@@ -3,6 +3,7 @@ using BLL.Interfaces;
 using BLL.ModelsDto;
 using DAL.Entities;
 using DAL.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace BLL.Services
@@ -52,6 +53,34 @@ namespace BLL.Services
 
             return Result<CommentDto>.Ok(201, comment);
 
+        }
+
+        public async Task<Result<IEnumerable<CommentDto>>> GetAsync(int articleId, int count = 0)
+        {
+            if (articleId <= 0)
+                return Result<IEnumerable<CommentDto>>.Fail(400, "Некорректный ID статьи");
+
+            IQueryable<Comment> query = _repository.GetQueryable()
+                .Where(c => c.ArticleId == articleId)
+                .OrderByDescending(c => c.CreatedAt);
+
+            if (count > 0)
+                query = query.Take(count);
+
+            var comments = await query
+                .Select(c => new CommentDto
+                {
+                    Id = c.Id.ToString(),
+                    Message = c.Message,
+                    Author = c.Author.UserName,
+                    AuthorId = c.AuthorId,
+                    CreatedAt = c.CreatedAt,
+                    UpdatedAt = c.UpdatedAt,
+                    ArticleId = c.ArticleId
+                })
+                .ToListAsync();
+
+            return Result<IEnumerable<CommentDto>>.Ok(200, comments);
         }
     }
 }

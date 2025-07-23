@@ -60,5 +60,17 @@ namespace WebApi.Controllers
             return Ok();
         }
 
+        [HttpPost("Get")]
+        public async Task<IActionResult> Get([FromBody] GetCommentViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _commentService.GetAsync(model.ArticleId, model.Count);
+
+            if (!result.Success)
+                return StatusCode(result.StatusCode, string.Join("\r\n", result.Errors));
+            return StatusCode(result.StatusCode, result.Data);
+        }
     }
 }

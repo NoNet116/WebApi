@@ -2,7 +2,7 @@
 {
     public class GetCommentViewModel
     {
-        public required string ArticleId { get; set; }
+        public required int ArticleId { get; set; }
 
         public int Count { get; set; }
     }
