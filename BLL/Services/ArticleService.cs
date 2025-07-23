@@ -190,6 +190,25 @@ namespace BLL.Services
         #endregion
 
         #region Find
+        public async Task<ArticleDto> FindByIdAsync (int id)
+        {
+            var query = _articleRepository.GetQueryable()
+        .Include(a => a.Author)
+        .Where(a => a.Id == id)
+        .Select(a => new ArticleDto
+        {
+            Id = a.Id,
+            Title = a.Title,
+            Content = a.Content,
+            CreatedAt = a.CreatedAt,
+            UpdatedAt = a.UpdatedAt,
+            AuthorId = a.AuthorId,
+            AuthorName = a.Author.UserName
+            // Добавь при необходимости другие свойства
+        });
+
+            return await query.FirstOrDefaultAsync();
+        }
         public async Task<Result<IEnumerable<ArticleDto>>> FindByTitleAsync(string? title = null)
         {
 

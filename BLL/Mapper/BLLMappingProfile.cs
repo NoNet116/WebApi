@@ -23,8 +23,15 @@ namespace BLL.Mapper
             TagMap();
 
             Article();
+            Comment();
         }
 
+        void Comment()
+        {
+            CreateMap<Comment, CommentDto>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
+            CreateMap<CommentDto, Comment>();
+        }
         void RoleMap()
         {
             CreateMap<IdentityRole, RoleDto>()

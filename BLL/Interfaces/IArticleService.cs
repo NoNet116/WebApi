@@ -10,5 +10,6 @@ namespace BLL.Interfaces
         Task<Result<IEnumerable<ArticleDto>>> FindByTitleAsync(string? title = null);
 
         Task<Result<IEnumerable<ArticleDto>>> GetLatestArticlesAsync(int count = 10);
+        Task<ArticleDto> FindByIdAsync(int id);
     }
 }

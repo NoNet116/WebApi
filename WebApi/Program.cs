@@ -64,6 +64,7 @@ builder.Services.AddScoped<IUserService, UserService>()
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IArticleService, ArticleService>();
 builder.Services.AddScoped<IArticleTagService, ArticleTagService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
 // Регистрируем обобщенный репозиторий (generic repository) для работы с сущностями
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
