@@ -18,7 +18,7 @@ namespace WebApi.Controllers
         }
 
         [HttpPost]
-        public IActionResult TestResponse ([FromBody] GetCommentViewModel model)
+        public IActionResult TestResponse([FromBody] GetCommentViewModel model)
         {
             var cmnt = new Comment()
             {
@@ -28,10 +28,10 @@ namespace WebApi.Controllers
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
             };
-            var vm = new CommentViewModel() {ArticleId = model.ArticleId, Comments = [cmnt]  };
+            var vm = new CommentViewModel() { ArticleId = model.ArticleId, Comments = [cmnt] };
             return StatusCode(200, vm);
         }
-       
+
         [HttpPost("Add")]
         public async Task<IActionResult> Add([FromBody] CreateCommentViewModel model)
         {
@@ -73,7 +73,7 @@ namespace WebApi.Controllers
         }
 
         [HttpPut("Edit")]
-        public async Task<IActionResult> Edit ([FromBody] EditCommentViewModel model)
+        public async Task<IActionResult> Edit([FromBody] EditCommentViewModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -89,7 +89,7 @@ namespace WebApi.Controllers
             {
                 Id = model.CommentId,
                 Message = model.Message,
-                AuthorId = userId, 
+                AuthorId = userId,
                 UpdatedAt = DateTime.UtcNow
             };
 
@@ -99,7 +99,6 @@ namespace WebApi.Controllers
                 return StatusCode(result.StatusCode, string.Join("\n", result.Errors));
 
             return Ok(result.Data);
-
         }
 
         [HttpDelete("{id:Guid}")]
@@ -122,6 +121,5 @@ namespace WebApi.Controllers
 
             return Ok("Комментарий удалён.");
         }
-
     }
 }

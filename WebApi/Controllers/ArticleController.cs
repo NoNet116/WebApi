@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using BLL;
 using BLL.Interfaces;
 using BLL.ModelsDto;
 using Microsoft.AspNet.Identity;
@@ -13,7 +12,6 @@ namespace WebApi.Controllers
     [Route("api/[controller]")]
     public class ArticleController : ControllerBase
     {
-
         private readonly IArticleService _articleService;
         private readonly ILogger<ArticleController> _logger;
         private readonly IMapper _mapper;
@@ -40,6 +38,7 @@ namespace WebApi.Controllers
 
             return StatusCode(result.StatusCode, result);
         }
+
         [HttpPost("Create2")]
         public async Task<IActionResult> Create2([FromBody] CreateArticleViewModel model)
         {
@@ -50,7 +49,6 @@ namespace WebApi.Controllers
                 return StatusCode(result.StatusCode, string.Join("\n \r", result.Errors));
 
             return StatusCode(result.StatusCode, result);
-
         }
 
         [HttpGet]
@@ -60,9 +58,8 @@ namespace WebApi.Controllers
             return StatusCode(res.StatusCode, res);
         }
 
-        
         [HttpGet("{count}")]
-        public async Task<IActionResult> Get (int count)
+        public async Task<IActionResult> Get(int count)
         {
             var res = await _articleService.GetLatestArticlesAsync(count);
             return StatusCode(res.StatusCode, res);

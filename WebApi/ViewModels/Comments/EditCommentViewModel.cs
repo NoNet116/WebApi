@@ -5,9 +5,9 @@ namespace WebApi.ViewModels.Comments
     public class EditCommentViewModel
     {
         [Required]
-        public required Guid CommentId { get; set; }
+        public Guid CommentId { get; set; }
 
         [Required]
-        public required string Message { get; set; }
+        public string Message { get; set; }
     }
 }

@@ -24,6 +24,7 @@ namespace DAL
                 Database.Migrate();
             }
         }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -81,7 +82,6 @@ namespace DAL
 
                 entity.Property(e => e.UpdatedAt)
                     .HasDefaultValue(DateTime.UtcNow);
-
             });
 
             modelBuilder.Entity<Comment>(entity =>
@@ -95,6 +95,7 @@ namespace DAL
             });
 
             #region ArticleTag
+
             modelBuilder.Entity<ArticleTags>(entity =>
             {
                 entity.ToTable("ArticleTags");
@@ -109,10 +110,9 @@ namespace DAL
                     .WithMany(t => t.ArticleTags)
                     .HasForeignKey(at => at.TagId)
                     .OnDelete(DeleteBehavior.Cascade);
-
             });
-            #endregion
 
+            #endregion ArticleTag
         }
     }
 }

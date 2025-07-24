@@ -1,6 +1,6 @@
 ﻿namespace BLL.ModelsDto
 {
-    public  class ArticleTagDto
+    public class ArticleTagDto
     {
         public int ArticleId { get; set; }
         public Guid TagId { get; set; }

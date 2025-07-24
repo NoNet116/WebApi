@@ -8,7 +8,8 @@ namespace WebApi.Mapper
 {
     public class PLLMappingProfile : Profile
     {
-        public PLLMappingProfile() {
+        public PLLMappingProfile()
+        {
             CreateMap<UserViewModel, UserDto>().ReverseMap();
             CreateMap<RegisterUserModel, UserDto>().ReverseMap();
 
@@ -17,22 +18,21 @@ namespace WebApi.Mapper
             ArticleMap();
         }
 
-        void RoleMap()
+        private void RoleMap()
         {
             CreateMap<RoleViewModel, RoleDto>().ReverseMap();
 
             CreateMap<RegisterRoleModel, RoleDto>();
-            
         }
 
-        void TagMap()
+        private void TagMap()
         {
             CreateMap<TagViewModel, TagDto>().ReverseMap();
             CreateMap<RegisterTagModel, TagDto>().ReverseMap();
             CreateMap<UpdateViewModel, TagDto>().ReverseMap();
         }
 
-        void ArticleMap()
+        private void ArticleMap()
         {
             CreateMap<CreateArticleViewModel, ArticleDto>().ReverseMap();
         }

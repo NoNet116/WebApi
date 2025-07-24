@@ -1,14 +1,12 @@
 using BLL.Extensions;
 using BLL.Interfaces;
 using BLL.Models;
-using BLL.ModelsDto;
 using BLL.Services;
 using DAL;
 using DAL.Interfaces;
 using DAL.Repositories;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Helpers;
@@ -70,9 +68,6 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 builder.Services.AddScoped(typeof(IService<,>), typeof(Service<,>));
 //builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-
-
-
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

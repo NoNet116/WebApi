@@ -4,9 +4,7 @@ using BLL.Models;
 using BLL.ModelsDto;
 using DAL.Entities;
 using DAL.Interfaces;
-using Microsoft.AspNet.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Authentication;
 
 namespace BLL.Services
 {
@@ -16,7 +14,6 @@ namespace BLL.Services
         private readonly IMapper _mapper;
         IRepository<User> _userRepository;
         private readonly IRoleService _roleService;
-
 
         public UserService(Microsoft.AspNetCore.Identity.UserManager<User> userManager, IMapper mapper, IRepository<User> userRepository, IRoleService roleService)
         {
@@ -33,13 +30,13 @@ namespace BLL.Services
             var result = new List<UserDto>();
             foreach (var user in users)
             {
-                var dto  = _mapper.Map<UserDto>(user);
+                var dto = _mapper.Map<UserDto>(user);
                 var roles = await _userManager.GetRolesAsync(user);
                 var role = roles.FirstOrDefault();
                 dto.Role = role;
                 result.Add(dto);
             }
-                return result;
+            return result;
         }
 
         public async Task<UserDto> GetUserByIdAsync(string id)
@@ -74,17 +71,14 @@ namespace BLL.Services
 
             var dto = _mapper.Map<UserDto>(user);
             return Result<UserDto>.Ok(201, dto);
-
         }
-
-
 
         public async Task<Result<bool>> DeleteUserAsync(string id)
         {
             var userEntity = await _userManager.FindByIdAsync(id);
 
             if (userEntity == null)
-                return Result<bool>.Fail(404,"Пользователь с указанным ID не найден.");
+                return Result<bool>.Fail(404, "Пользователь с указанным ID не найден.");
 
             var result = await _userManager.DeleteAsync(userEntity);
 
@@ -147,6 +141,5 @@ namespace BLL.Services
 
             return Result<string>.Ok(200, "Роль пользователя успешно обновлена");
         }
-
     }
 }

@@ -30,11 +30,11 @@ namespace BLL.Services
                 if (string.IsNullOrEmpty(tagDto.Name))
                     return Result<bool>.Fail(400, "No name is set for the tag");
 
-                if(user == null)
+                if (user == null)
                     return Result<bool>.Fail(401, "The ClaimsPrincipal user must not be null");
-                            
+
                 var existingTag = await _repository.FirstOrDefaultAsync(n => n.Name == tagDto.Name);
-               
+
                 if (existingTag != null)
                     return Result<bool>.Fail(409, "A tag with this name already exists.");
 
@@ -52,7 +52,7 @@ namespace BLL.Services
                 return Result<bool>.Fail(500, detailedMessage);
             }
         }
-                
+
         public async Task<Result<IEnumerable<TagDto>>> FindByNameAsync(string? name = null)
         {
             try
@@ -63,7 +63,7 @@ namespace BLL.Services
                     result = result.Where(n => n.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
                 }
                 var dto = _mapper.Map<IEnumerable<TagDto>>(result);
-               
+
                 return Result<IEnumerable<TagDto>>.Ok(200, dto);
             }
             catch (Exception ex)
@@ -87,7 +87,7 @@ namespace BLL.Services
             }
             catch (Exception ex)
             {
-                return Result<TagDto>.Fail(500,ex.Message);
+                return Result<TagDto>.Fail(500, ex.Message);
             }
         }
 
@@ -102,7 +102,7 @@ namespace BLL.Services
 
             var tag = await _repository.GetByIdAsync(id);
             if (tag == null)
-                return Result<TagDto>.Fail(404,"Tag not found");
+                return Result<TagDto>.Fail(404, "Tag not found");
 
             // Обновляем только если имя не пустое
             if (!string.IsNullOrEmpty(updDto.Name))
@@ -120,8 +120,7 @@ namespace BLL.Services
 
             var tagDto = _mapper.Map<TagDto>(updatedTag);
 
-            return Result<TagDto>.Ok(200,tagDto);
-
+            return Result<TagDto>.Ok(200, tagDto);
         }
 
         public async Task<Result<bool>> DeleteAsync(Guid id)
@@ -134,16 +133,15 @@ namespace BLL.Services
             var tag = await _repository.GetByIdAsync(id);
 
             if (tag == null)
-                return Result<bool>.Fail(404,"Tag not found");
+                return Result<bool>.Fail(404, "Tag not found");
 
             await _repository.DeleteAsync(tag);
 
-            return Result<bool>.Ok(204,true);
-
+            return Result<bool>.Ok(204, true);
         }
 
-        public async Task<Tag?> FirstOrDefaultEntityAsync(string name) => 
-            string.IsNullOrEmpty(name)? null : await _repository.FirstOrDefaultAsync(n => n.Name == name);
+        public async Task<Tag?> FirstOrDefaultEntityAsync(string name) =>
+            string.IsNullOrEmpty(name) ? null : await _repository.FirstOrDefaultAsync(n => n.Name == name);
 
         public async Task<IEnumerable<Tag>> GetExistingTagsAsync(IEnumerable<string> tagNames)
         {
@@ -163,6 +161,5 @@ namespace BLL.Services
                 throw;
             }
         }
-
     }
 }

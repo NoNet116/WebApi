@@ -8,7 +8,6 @@ using WebApi.ViewModels.Tags;
 
 namespace WebApi.Controllers
 {
-    
     [ApiController, Authorize]
     [Route("api/[controller]")]
     public class TagController : ControllerBase
@@ -17,12 +16,13 @@ namespace WebApi.Controllers
         private readonly IMapper _mapper;
         private readonly IService<Tag, TagDto> _Service;
 
-        public TagController(ITagService tagService, IMapper mapper, IService<Tag,TagDto> service)
+        public TagController(ITagService tagService, IMapper mapper, IService<Tag, TagDto> service)
         {
             _tagService = tagService;
             _mapper = mapper;
             _Service = service;
         }
+
         #region Create Tag
 
         [HttpPost("Create")]
@@ -33,9 +33,11 @@ namespace WebApi.Controllers
             var result = await _tagService.CreateAsync(dto, User);
             return StatusCode(result.StatusCode, result);
         }
-        #endregion
+
+        #endregion Create Tag
 
         #region Find Tag
+
         [HttpGet("by-name/")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> FindByName(string? name)
@@ -58,9 +60,11 @@ namespace WebApi.Controllers
             var result = await _Service.GetAllAsync();
             return Ok(result);
         }
-        #endregion
+
+        #endregion Find Tag
 
         #region Update Tag
+
         [HttpPut("update")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Update([FromBody] UpdateViewModel model)
@@ -72,18 +76,21 @@ namespace WebApi.Controllers
             var result = await _tagService.UpdateAsync(dto);
 
             return StatusCode(result.StatusCode, result);
-      }
-        #endregion
+        }
+
+        #endregion Update Tag
 
         #region Delete Tag
+
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public async Task<IActionResult> Delete (Guid id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _tagService.DeleteAsync(id);
 
             return StatusCode(result.StatusCode, result);
         }
-        #endregion
+
+        #endregion Delete Tag
     }
 }

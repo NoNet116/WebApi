@@ -4,6 +4,6 @@
     where TEntity : class
     where TDto : class
     {
-       abstract Task<Result<TDto>> CreateAsync(TDto dto);
+        abstract Task<Result<TDto>> CreateAsync(TDto dto);
     }
 }

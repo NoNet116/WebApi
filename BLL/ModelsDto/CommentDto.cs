@@ -1,7 +1,4 @@
-﻿
-using System.Text.Json.Serialization;
-
-namespace BLL.ModelsDto
+﻿namespace BLL.ModelsDto
 {
     public class CommentDto
     {
@@ -11,8 +8,7 @@ namespace BLL.ModelsDto
         public string AuthorId { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        
+
         public int ArticleId { get; set; }
-       
     }
 }

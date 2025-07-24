@@ -8,12 +8,12 @@ namespace BLL.ModelsDto
 
         [Required]
         [MaxLength(50)]
-        public required string Name { get; set; }
+        public string Name { get; set; }
 
         [MaxLength(255)]
         public string Description { get; set; } = string.Empty;
 
-        public DateTime CreatedAt { get; set; } 
+        public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
         public string Author { get; set; } = null!;

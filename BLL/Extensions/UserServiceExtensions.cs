@@ -3,8 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BLL.Extensions
 {
-   public static class UserServiceExtensions
-   {
+    public static class UserServiceExtensions
+    {
         /// <summary>
         /// Роль устанавливаемая пользователю по умолчанию
         /// </summary>
@@ -14,6 +14,5 @@ namespace BLL.Extensions
 
             return services;
         }
-   }
-   
+    }
 }

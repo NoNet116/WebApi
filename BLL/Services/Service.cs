@@ -37,6 +37,5 @@ namespace BLL.Services
                 return Result<TDto>.Fail(500, ex.Message);
             }
         }
-
     }
 }

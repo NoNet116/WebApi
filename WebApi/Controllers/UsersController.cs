@@ -10,10 +10,11 @@ namespace WebApi.Controllers
     [ApiController]
     [Authorize]
     [Route("api/[controller]")]
-    public class UsersController : ControllerBase 
+    public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+
         public UsersController(IUserService userService, IMapper mapper)
         {
             _userService = userService;
@@ -23,7 +24,6 @@ namespace WebApi.Controllers
         [AllowAnonymous]
         [HttpGet("All")]
         [ProducesResponseType(typeof(IEnumerable<UserViewModel>), StatusCodes.Status200OK)]
-       
         public async Task<IActionResult> GetAll()
         {
             var usersDto = await _userService.GetAllUsersAsync();
@@ -32,7 +32,6 @@ namespace WebApi.Controllers
             return Ok(_mapper.Map<IEnumerable<UserViewModel>>(usersDto));
         }
 
-        
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(UserViewModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -44,7 +43,7 @@ namespace WebApi.Controllers
 
             return Ok(_mapper.Map<UserViewModel>(user));
         }
-       
+
         [AllowAnonymous, HttpPost("Create")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -64,7 +63,7 @@ namespace WebApi.Controllers
 
             return CreatedAtAction(
                 nameof(GetById),
-                new { id = createdUser.Id }, 
+                new { id = createdUser.Id },
                 createdUser
             );
         }
@@ -72,12 +71,13 @@ namespace WebApi.Controllers
         [AllowAnonymous, HttpPost("CreateAdministrator")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateAdmin()        {
+        public async Task<IActionResult> CreateAdmin()
+        {
             var defaultpass = "12345678";
             var model = new RegisterUserModel()
             {
                 Email = "admin@e.ru",
-                UserName ="admin",
+                UserName = "admin",
                 Password = defaultpass
             };
 
@@ -92,8 +92,8 @@ namespace WebApi.Controllers
             }
 
             if (!CreateAdmin.Success)
-                return StatusCode(CreateAdmin.StatusCode, string.Join("\r\n", CreateAdmin.Errors)); 
-            
+                return StatusCode(CreateAdmin.StatusCode, string.Join("\r\n", CreateAdmin.Errors));
+
             var createdUser = CreateAdmin.Data!;
 
             return Ok(
@@ -101,7 +101,6 @@ namespace WebApi.Controllers
 
             );
         }
-
 
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -147,10 +146,6 @@ namespace WebApi.Controllers
                 return StatusCode(result.StatusCode, string.Join("\r\n", result.Errors));
 
             return StatusCode(result.StatusCode, result.Data);
-
         }
-
     }
-
-
 }

@@ -13,6 +13,7 @@
             return data;
         }
     }
+
     public class Result<T>
     {
         public bool Success { get; set; }
@@ -27,8 +28,5 @@
             new() { Success = false, StatusCode = statuscode, Errors = errors.ToList() };
 
         public bool DataIsNull => Data == null;
-
-        
-       
     }
 }

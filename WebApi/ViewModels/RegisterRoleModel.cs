@@ -5,6 +5,6 @@ namespace WebApi.ViewModels
     public class RegisterRoleModel
     {
         [Required, MaxLength(50)]
-        public required string Name { get; set; }
+        public string Name { get; set; }
     }
 }

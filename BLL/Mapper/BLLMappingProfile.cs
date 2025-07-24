@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BLL.Mapper
 {
-    public class BLLMappingProfile :Profile
+    public class BLLMappingProfile : Profile
     {
         public BLLMappingProfile()
         {
@@ -26,13 +26,14 @@ namespace BLL.Mapper
             Comment();
         }
 
-        void Comment()
+        private void Comment()
         {
             CreateMap<Comment, CommentDto>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
             CreateMap<CommentDto, Comment>();
         }
-        void RoleMap()
+
+        private void RoleMap()
         {
             CreateMap<IdentityRole, RoleDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
@@ -43,7 +44,7 @@ namespace BLL.Mapper
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name));
         }
 
-        void TagMap()
+        private void TagMap()
         {
             // Из Entity → в DTO
             CreateMap<Tag, TagDto>()
@@ -52,21 +53,19 @@ namespace BLL.Mapper
             // Из DTO → в Entity
             CreateMap<TagDto, Tag>()
                 .ForMember(dest => dest.CreatedByUserId, opt => opt.Ignore())
-                .ForMember(dest => dest.CreatedByUser, opt => opt.Ignore()); 
+                .ForMember(dest => dest.CreatedByUser, opt => opt.Ignore());
         }
 
-        void Article()
+        private void Article()
         {
             // Mapping из сущности в DTO
             CreateMap<Article, ArticleDto>()
-                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.UserName)); 
+                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.UserName));
 
             // Mapping из DTO в сущность
             CreateMap<ArticleDto, Article>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.Author, opt => opt.Ignore());
-
-
         }
     }
 }

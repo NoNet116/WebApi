@@ -20,8 +20,8 @@ namespace BLL.Services
             IMapper mapper,
             ILogger<CommentService> logger,
             IArticleService articleService,
-            IUserService userService) 
-        { 
+            IUserService userService)
+        {
             _repository = repository;
             _mapper = mapper;
             _logger = logger;
@@ -31,15 +31,15 @@ namespace BLL.Services
 
         public async Task<Result<CommentDto>> CreateAsync(CommentDto comment)
         {
-            if(string.IsNullOrEmpty(comment.Message))
+            if (string.IsNullOrEmpty(comment.Message))
                 return Result<CommentDto>.Fail(400, "Сообщение не должно быть пустым.");
 
             if (string.IsNullOrEmpty(comment.AuthorId))
                 return Result<CommentDto>.Fail(400, "Не указан Id автора.");
             var author = await _userService.GetUserByIdAsync(comment.AuthorId);
 
-            if(author == null)
-                return Result<CommentDto>.Fail(401,"User not found");
+            if (author == null)
+                return Result<CommentDto>.Fail(401, "User not found");
 
             var article = await _articleService.FindByIdAsync(comment.ArticleId);
             if (article == null)
@@ -52,7 +52,6 @@ namespace BLL.Services
             await _repository.AddAsync(entity);
 
             return Result<CommentDto>.Ok(201, comment);
-
         }
 
         public async Task<Result<IEnumerable<CommentDto>>> GetAsync(int articleId, int count = 0)
@@ -114,6 +113,5 @@ namespace BLL.Services
             await _repository.DeleteAsync(comment);
             return Result<string>.Ok(200, "Комментарий удален.");
         }
-
     }
 }

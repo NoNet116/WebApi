@@ -23,8 +23,6 @@ public class Repository<T> : IRepository<T> where T : class
         Set = set;
     }
 
-  
-  
     public async Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includes)
     {
         IQueryable<T> query = Set;
@@ -37,7 +35,6 @@ public class Repository<T> : IRepository<T> where T : class
         return await query.ToListAsync();
     }
 
-
     public async Task<T?> GetByIdAsync(object id)
     {
         return await Set.FindAsync(id);
@@ -45,8 +42,9 @@ public class Repository<T> : IRepository<T> where T : class
 
     public IQueryable<T> GetQueryable()
     {
-        return Set.AsQueryable(); 
+        return Set.AsQueryable();
     }
+
     public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
     {
         return await Set.FirstOrDefaultAsync(predicate);
@@ -70,6 +68,4 @@ public class Repository<T> : IRepository<T> where T : class
         Set.Remove(Item);
         await _db.SaveChangesAsync();
     }
-
 }
-

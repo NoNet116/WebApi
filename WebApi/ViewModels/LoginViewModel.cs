@@ -11,6 +11,5 @@ namespace WebApi.ViewModels
         [Required(ErrorMessage = "Пароль обязателен")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
-
     }
 }

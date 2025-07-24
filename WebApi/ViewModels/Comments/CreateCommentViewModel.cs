@@ -4,9 +4,9 @@ namespace WebApi.ViewModels.Comments
 {
     public class CreateCommentViewModel
     {
-        public required int ArticleId { get; set; }
+        public int ArticleId { get; set; }
 
         [MaxLength(250)]
-        public required string Message { get; set; }
+        public string Message { get; set; }
     }
 }

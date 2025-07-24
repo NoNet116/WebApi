@@ -7,17 +7,19 @@ namespace DAL.Entities
         public Guid Id { get; set; }
 
         [Required]
-        public required string Message { get; set; }
+        public string Message { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        public required int  ArticleId { get; set; }
-        public required string AuthorId { get; set; }
-        [Required]
-        public required Article Article { get; set; }
-        [Required]
-        public required User Author { get; set; }
+        public int ArticleId { get; set; }
+        public string AuthorId { get; set; }
 
+        [Required]
+        public Article Article { get; set; }
+
+        [Required]
+        public User Author { get; set; }
     }
 }

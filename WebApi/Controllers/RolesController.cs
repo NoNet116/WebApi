@@ -23,7 +23,6 @@ namespace WebApi.Controllers
             _logger = logger;
         }
 
-        
         [HttpGet("All")]
         public async Task<IActionResult> GetAll()
         {
@@ -40,7 +39,6 @@ namespace WebApi.Controllers
             }
         }
 
-        
         [HttpGet("by-id/{id}")]
         public async Task<IActionResult> GetById(string id)
         {
@@ -63,7 +61,6 @@ namespace WebApi.Controllers
             return Ok(viewModel);
         }
 
-
         [HttpPost("Create")]
         public async Task<IActionResult> Create([FromBody] RegisterRoleModel model)
         {
@@ -78,7 +75,7 @@ namespace WebApi.Controllers
                 if (!result.Success)
                     return BadRequest(result.Errors);
 
-                return CreatedAtAction(nameof(GetById), new { id = result.Data!.Id}, model);
+                return CreatedAtAction(nameof(GetById), new { id = result.Data!.Id }, model);
             }
             catch (Exception ex)
             {
@@ -87,7 +84,6 @@ namespace WebApi.Controllers
             }
         }
 
-        
         [HttpPut("Update")]
         public async Task<IActionResult> Update([FromBody] RoleViewModel model)
         {
@@ -102,7 +98,6 @@ namespace WebApi.Controllers
 
             return Ok();
         }
-
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)

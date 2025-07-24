@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization.Policy;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Policy;
 
 namespace WebApi.Helpers
 {
@@ -46,5 +46,4 @@ namespace WebApi.Helpers
             await _defaultHandler.HandleAsync(next, context, policy, authorizeResult);
         }
     }
-
 }

@@ -6,10 +6,10 @@ namespace DAL.Entities
     public class User : IdentityUser
     {
         [MaxLength(50)]
-        public required string LastName { get; set; }
+        public string LastName { get; set; }
 
         [MaxLength(50)]
-        public required string FirstName { get; set; }
+        public string FirstName { get; set; }
 
         [MaxLength(50)]
         public string? FatherName { get; set; }
@@ -21,11 +21,10 @@ namespace DAL.Entities
 
         [MaxLength(100)]
         public string Status { get; set; } = "Offline";
-        public DateTime? LastActive { get; set; }
 
+        public DateTime? LastActive { get; set; }
 
         [MaxLength(500)]
         public string? About { get; set; }
-
     }
 }
