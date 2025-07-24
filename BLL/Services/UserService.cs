@@ -17,6 +17,7 @@ namespace BLL.Services
         IRepository<User> _userRepository;
         private readonly IRoleService _roleService;
 
+
         public UserService(Microsoft.AspNetCore.Identity.UserManager<User> userManager, IMapper mapper, IRepository<User> userRepository, IRoleService roleService)
         {
             _userManager = userManager;
@@ -27,8 +28,18 @@ namespace BLL.Services
 
         public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
         {
-            var userEntity = await _userManager.Users.ToListAsync();
-            return _mapper.Map<IEnumerable<UserDto>>(userEntity);
+            var users = await _userManager.Users.ToListAsync();
+
+            var result = new List<UserDto>();
+            foreach (var user in users)
+            {
+                var dto  = _mapper.Map<UserDto>(user);
+                var roles = await _userManager.GetRolesAsync(user);
+                var role = roles.FirstOrDefault();
+                dto.Role = role;
+                result.Add(dto);
+            }
+                return result;
         }
 
         public async Task<UserDto> GetUserByIdAsync(string id)
@@ -98,6 +109,43 @@ namespace BLL.Services
             {
                 return Result<IEnumerable<UserDto>>.Fail(500, ex.Message);
             }
+        }
+
+        public async Task<Result<string>> EditUserRoleAsync(string userId, string newRole)
+        {
+            // Параллельно получаем пользователя и проверку роли
+            var userTask = _userManager.FindByIdAsync(userId);
+            var roleTask = _roleService.GetByNamesAsync(newRole);
+
+            await Task.WhenAll(userTask, roleTask);
+
+            var user = userTask.Result;
+            var roleExists = roleTask.Result;
+
+            if (user == null)
+                return Result<string>.Fail(404, "Пользователь не найден");
+
+            if (roleExists.DataIsNull)
+                return Result<string>.Fail(404, $"Роль '{newRole}' не найдена");
+
+            // Удаление текущих ролей пользователя
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            if (currentRoles.Any())
+            {
+                var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                if (!removeResult.Succeeded)
+                    return Result<string>.Fail(500, "Ошибка при удалении текущих ролей");
+            }
+
+            // Добавление новой роли
+            var addResult = await _userManager.AddToRoleAsync(user, newRole);
+            if (!addResult.Succeeded)
+                return Result<string>.Fail(500, "Ошибка при добавлении новой роли");
+
+            // Обновление security stamp
+            await _userManager.UpdateSecurityStampAsync(user);
+
+            return Result<string>.Ok(200, "Роль пользователя успешно обновлена");
         }
 
     }

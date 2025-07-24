@@ -57,7 +57,7 @@ namespace WebApi.Controllers
             var result = await _userService.CreateUserAsync(userDto);
 
             if (!result.Success)
-                return BadRequest(new { Errors = result.Errors });
+                return StatusCode(result.StatusCode, string.Join("\r\n", result.Errors));
 
             // Получаем созданного пользователя (например, с ID/email)
             var createdUser = result.Data!;
@@ -66,6 +66,39 @@ namespace WebApi.Controllers
                 nameof(GetById),
                 new { id = createdUser.Id }, 
                 createdUser
+            );
+        }
+
+        [AllowAnonymous, HttpPost("CreateAdministrator")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateAdmin()        {
+            var defaultpass = "12345678";
+            var model = new RegisterUserModel()
+            {
+                Email = "admin@e.ru",
+                UserName ="admin",
+                Password = defaultpass
+            };
+
+            var userDto = _mapper.Map<UserDto>(model);
+            var CreateAdmin = await _userService.CreateUserAsync(userDto);
+
+            if (!CreateAdmin.DataIsNull)
+            {
+                var editroleresult = await _userService.EditUserRoleAsync(CreateAdmin.Data.Id, "Administrator");
+                if (!editroleresult.Success)
+                    return StatusCode(editroleresult.StatusCode, string.Join("\r\n", editroleresult.Errors));
+            }
+
+            if (!CreateAdmin.Success)
+                return StatusCode(CreateAdmin.StatusCode, string.Join("\r\n", CreateAdmin.Errors)); 
+            
+            var createdUser = CreateAdmin.Data!;
+
+            return Ok(
+                $"Username: admin\r\nEmail: admin@e.ru\r\nPassword: {defaultpass}"
+
             );
         }
 
@@ -102,7 +135,20 @@ namespace WebApi.Controllers
             return Ok(_mapper.Map<UserViewModel>(user));
         }
 
+        [HttpPut("EditUserRole")]
+        public async Task<IActionResult> EditUserRole([FromBody] EditUserRoleViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
+            var result = await _userService.EditUserRoleAsync(model.UserId, model.NewRole);
+
+            if (!result.Success)
+                return StatusCode(result.StatusCode, string.Join("\r\n", result.Errors));
+
+            return StatusCode(result.StatusCode, result.Data);
+
+        }
 
     }
 

@@ -157,7 +157,7 @@ namespace BLL.Services
                         _articleTagService.CreateAsync(new ArticleTagCreateDto
                         {
                             TagId = tag.Id,
-                            ArticleId = article.Id // Исправлено: используем ID созданной статьи
+                            ArticleId = article.Id 
                         }));
 
                     await Task.WhenAll(tagTasks);

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BLL.Interfaces;
 using BLL.ModelsDto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.ViewModels;
 
@@ -8,6 +9,7 @@ namespace WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Administrator")]
     public class RolesController : ControllerBase
     {
         private readonly IMapper _mapper;
