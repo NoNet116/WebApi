@@ -36,7 +36,7 @@ namespace WebApi.Controllers
         public async Task<IActionResult> Add([FromBody] CreateCommentViewModel model)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState); // Лучше вернуть ModelState, а не модель
+                return BadRequest(ModelState);
 
             var userId = User?.Identity?.GetUserId();
             if (string.IsNullOrEmpty(userId))
@@ -57,7 +57,6 @@ namespace WebApi.Controllers
                 return StatusCode(result.StatusCode, string.Join("\r\n", result.Errors));
 
             return StatusCode(result.StatusCode, result.Data);
-            return Ok();
         }
 
         [HttpPost("Get")]
@@ -72,5 +71,57 @@ namespace WebApi.Controllers
                 return StatusCode(result.StatusCode, string.Join("\r\n", result.Errors));
             return StatusCode(result.StatusCode, result.Data);
         }
+
+        [HttpPut("Edit")]
+        public async Task<IActionResult> Edit ([FromBody] EditCommentViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (model.CommentId == default)
+                return BadRequest("Id is required");
+
+            var userId = User?.Identity?.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User not authenticated.");
+
+            var dto = new CommentDto
+            {
+                Id = model.CommentId,
+                Message = model.Message,
+                AuthorId = userId, 
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            var result = await _commentService.UpdateAsync(dto);
+
+            if (!result.Success)
+                return StatusCode(result.StatusCode, string.Join("\n", result.Errors));
+
+            return Ok(result.Data);
+
+        }
+
+        [HttpDelete("{id:Guid}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            if (id == default)
+                return BadRequest("Id is required.");
+
+            var userId = User?.Identity?.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User not authenticated.");
+
+            // Проверка, админ ли пользователь
+            var isAdmin = User.IsInRole("Admin");
+
+            var result = await _commentService.DeleteAsync(id, userId, isAdmin);
+
+            if (!result.Success)
+                return StatusCode(result.StatusCode, string.Join("\n", result.Errors));
+
+            return Ok("Комментарий удалён.");
+        }
+
     }
 }

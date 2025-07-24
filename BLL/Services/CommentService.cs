@@ -70,7 +70,7 @@ namespace BLL.Services
             var comments = await query
                 .Select(c => new CommentDto
                 {
-                    Id = c.Id.ToString(),
+                    Id = c.Id,
                     Message = c.Message,
                     Author = c.Author.UserName,
                     AuthorId = c.AuthorId,
@@ -82,5 +82,38 @@ namespace BLL.Services
 
             return Result<IEnumerable<CommentDto>>.Ok(200, comments);
         }
+
+        public async Task<Result<CommentDto>> UpdateAsync(CommentDto dto)
+        {
+            var comment = await _repository.GetByIdAsync(dto.Id);
+            if (comment == null)
+                return Result<CommentDto>.Fail(404, "Комментарий не найден.");
+
+            if (comment.AuthorId != dto.AuthorId)
+                return Result<CommentDto>.Fail(403, "Вы не являетесь автором этого комментария.");
+
+            comment.Message = dto.Message;
+            comment.UpdatedAt = DateTime.UtcNow;
+
+            await _repository.UpdateAsync(comment);
+
+            var updatedDto = _mapper.Map<CommentDto>(comment);
+            return Result<CommentDto>.Ok(200, updatedDto);
+        }
+
+        public async Task<Result<string>> DeleteAsync(Guid commentId, string userId, bool isAdmin = false)
+        {
+            var comment = await _repository.GetByIdAsync(commentId);
+            if (comment == null)
+                return Result<string>.Fail(404, "Комментарий не найден.");
+
+            // Проверка прав: автор или админ
+            if (comment.AuthorId != userId && !isAdmin)
+                return Result<string>.Fail(403, "Недостаточно прав для удаления комментария.");
+
+            await _repository.DeleteAsync(comment);
+            return Result<string>.Ok(200, "Комментарий удален.");
+        }
+
     }
 }

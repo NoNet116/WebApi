@@ -5,7 +5,7 @@ namespace BLL.ModelsDto
 {
     public class CommentDto
     {
-        public string Id { get; set; }
+        public Guid Id { get; set; }
         public string Message { get; set; }
         public string Author { get; set; }
         public string AuthorId { get; set; }
