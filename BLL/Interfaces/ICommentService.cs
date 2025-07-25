@@ -11,5 +11,6 @@ namespace BLL.Interfaces
         Task<Result<CommentDto>> UpdateAsync(CommentDto dto);
 
         Task<Result<string>> DeleteAsync(Guid commentId, string userId, bool isAdmin = false);
+        Task<Result<CommentDto>> GetByIdAsync(Guid id);
     }
 }

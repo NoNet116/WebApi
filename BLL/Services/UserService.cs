@@ -12,7 +12,7 @@ namespace BLL.Services
     {
         private readonly Microsoft.AspNetCore.Identity.UserManager<User> _userManager;
         private readonly IMapper _mapper;
-        IRepository<User> _userRepository;
+        private IRepository<User> _userRepository;
         private readonly IRoleService _roleService;
 
         public UserService(Microsoft.AspNetCore.Identity.UserManager<User> userManager, IMapper mapper, IRepository<User> userRepository, IRoleService roleService)

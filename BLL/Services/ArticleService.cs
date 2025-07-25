@@ -277,19 +277,16 @@ namespace BLL.Services
         }
 
         #endregion Find
-
         public async Task<Result<IEnumerable<ArticleDto>>> GetLatestArticlesAsync(int count = 10)
         {
             try
             {
                 var articles = await _articleRepository.GetQueryable()
-                    .Include(a => a.Author)              // Загружаем автора
-                                                         //    .Include(a => a.ArticleTags)         // Загружаем связи с тегами
-                                                         //    .ThenInclude(at => at.Tag)       // Загружаем сами теги
-                                                         //  .Include(a => a.Comments)           // Загружаем комментарии
-                    .OrderByDescending(a => a.CreatedAt) // Сортируем по дате создания (новые сначала)
-                    .Take(count)                        // Берем только указанное количество
-                    .AsNoTracking()                     // Для read-only операций
+                    .Include(a => a.Author)
+                    .Include(a => a.ArticleTags).ThenInclude(at => at.Tag)
+                    .Include(a => a.Comments)
+                    .OrderByDescending(a => a.CreatedAt)
+                    .Take(count)
                     .ToListAsync();
 
                 var result = articles.Select(a => new ArticleDto
@@ -303,7 +300,7 @@ namespace BLL.Services
                     AuthorName = a.Author.UserName,
                     TagsCount = a.ArticleTags.Count,
                     CommentsCount = a.Comments.Count,
-                    Tags = (List<string>)a.ArticleTags.Select(at => at.Tag.Name)
+                    Tags = (List<string>)a.ArticleTags.Select(at => at.Tag.Name).ToList(),
                 });
 
                 return Result<IEnumerable<ArticleDto>>.Ok(200, result);
@@ -311,7 +308,40 @@ namespace BLL.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка при получении последних статей");
-                return Result<IEnumerable<ArticleDto>>.Fail(500, "Не удалось загрузить статьи");
+                return Result<IEnumerable<ArticleDto>>.Fail(500, "Не удалось загрузить статью.");
+            }
+        }
+        
+        public async Task<Result<IEnumerable<ArticleDto>>> GetByAuthorIdAsync(string authorId)
+        {
+            try
+            {
+                var articles = await _articleRepository.GetQueryable()
+               .Where(a => a.Author.Id == authorId)
+                 .Include(a => a.Author)
+                 .Include(a => a.ArticleTags)
+                 .ThenInclude(at => at.Tag)
+                .Include(a => a.Comments)
+                .ToListAsync();
+
+                var result = articles.Select(a => new ArticleDto
+                {
+                    Id = a.Id,
+                    Title = a.Title,
+                    Content = a.Content,
+                    CreatedAt = a.CreatedAt,
+                    UpdatedAt = a.UpdatedAt,
+                    AuthorId = a.AuthorId,
+                    AuthorName = a.Author.UserName,
+                    TagsCount = a.ArticleTags.Count,
+                    CommentsCount = a.Comments.Count,
+                    Tags = (List<string>)a.ArticleTags.Select(at => at.Tag.Name).ToList()
+                });
+                return Result<IEnumerable<ArticleDto>>.Ok(200, result);
+            }
+            catch (Exception ex)
+            {
+                return Result<IEnumerable<ArticleDto>>.Fail(500, ex.Message);
             }
         }
     }

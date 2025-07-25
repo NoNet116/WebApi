@@ -54,6 +54,28 @@ namespace BLL.Services
             return Result<CommentDto>.Ok(201, comment);
         }
 
+        public async Task<Result<CommentDto>> GetByIdAsync(Guid id)
+        {
+            var comment = await _repository.GetQueryable()
+                .Where(c => c.Id == id)
+                .Select(c => new CommentDto
+                {
+                    Id = c.Id,
+                    Message = c.Message,
+                    Author = c.Author.UserName,
+                    AuthorId = c.AuthorId,
+                    CreatedAt = c.CreatedAt,
+                    UpdatedAt = c.UpdatedAt,
+                    ArticleId = c.ArticleId
+                })
+                .FirstOrDefaultAsync();
+
+            if (comment == null)
+                return Result<CommentDto>.Fail(404, "Комментарий не найден");
+
+            return Result<CommentDto>.Ok(200, comment);
+        }
+
         public async Task<Result<IEnumerable<CommentDto>>> GetAsync(int articleId, int count = 0)
         {
             if (articleId <= 0)

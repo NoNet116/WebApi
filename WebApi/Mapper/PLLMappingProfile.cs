@@ -3,6 +3,7 @@ using BLL.ModelsDto;
 using WebApi.ViewModels;
 using WebApi.ViewModels.Articles;
 using WebApi.ViewModels.Tags;
+using WebApi.ViewModels.Comments;
 
 namespace WebApi.Mapper
 {
@@ -16,6 +17,7 @@ namespace WebApi.Mapper
             RoleMap();
             TagMap();
             ArticleMap();
+            CommentMap();
         }
 
         private void RoleMap()
@@ -35,6 +37,10 @@ namespace WebApi.Mapper
         private void ArticleMap()
         {
             CreateMap<CreateArticleViewModel, ArticleDto>().ReverseMap();
+        }
+        private void CommentMap()
+        {
+            CreateMap<CommentDto, ViewModels.Comments.Comment>().ReverseMap();
         }
     }
 }

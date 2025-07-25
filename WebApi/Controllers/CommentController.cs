@@ -1,4 +1,6 @@
-﻿using BLL.Interfaces;
+﻿using AutoMapper;
+using BLL;
+using BLL.Interfaces;
 using BLL.ModelsDto;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,18 +13,20 @@ namespace WebApi.Controllers
     public class CommentController : ControllerBase
     {
         private readonly ICommentService _commentService;
+        private readonly IMapper _mapper;
 
-        public CommentController(ICommentService commentService)
+        public CommentController(ICommentService commentService, IMapper mapper)
         {
             _commentService = commentService;
+            _mapper = mapper;
         }
 
-        [HttpPost]
+        [HttpPost("Example")]
         public IActionResult TestResponse([FromBody] GetCommentViewModel model)
         {
             var cmnt = new Comment()
             {
-                Id = "1",
+                Id = new Guid(),
                 Message = "Тестовый ответ",
                 Author = "Иван Иванов",
                 CreatedAt = DateTime.Now,
@@ -69,7 +73,37 @@ namespace WebApi.Controllers
 
             if (!result.Success)
                 return StatusCode(result.StatusCode, string.Join("\r\n", result.Errors));
-            return StatusCode(result.StatusCode, result.Data);
+
+            var artId = result.Data.FirstOrDefault()?.ArticleId ?? model.ArticleId;
+
+            var comments = new CommentViewModel
+            {
+                ArticleId = artId,
+                Comments = _mapper.Map<List<ViewModels.Comments.Comment>>(result.Data)
+            };
+
+            return StatusCode(result.StatusCode, comments);
+        }
+
+        [HttpPost("GetById")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _commentService.GetByIdAsync(id);
+
+            if (!result.Success)
+                return StatusCode(result.StatusCode, string.Join("\r\n", result.Errors));
+            var comments = new CommentViewModel()
+            {
+                ArticleId = result.Data.ArticleId,
+                Comments = new List<ViewModels.Comments.Comment>
+                {
+                    _mapper.Map<ViewModels.Comments.Comment>(result.Data)
+                }
+            };
+            return StatusCode(result.StatusCode, comments);
         }
 
         [HttpPut("Edit")]

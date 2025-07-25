@@ -64,5 +64,16 @@ namespace WebApi.Controllers
             var res = await _articleService.GetLatestArticlesAsync(count);
             return StatusCode(res.StatusCode, res);
         }
+
+        [HttpGet("author/{authorId}")]
+        public async Task<IActionResult> GetByAuthor(string authorId)
+        {
+            var result = await _articleService.GetByAuthorIdAsync(authorId);
+
+            if(!result.Success)
+                return StatusCode(result.StatusCode, string.Join("\r\n", result.Errors));
+
+            return StatusCode(result.StatusCode, result.Data);
+        }
     }
 }

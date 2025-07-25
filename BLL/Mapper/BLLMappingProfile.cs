@@ -60,7 +60,11 @@ namespace BLL.Mapper
         {
             // Mapping из сущности в DTO
             CreateMap<Article, ArticleDto>()
-                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.UserName));
+    .ForMember(dest => dest.AuthorId, opt => opt.MapFrom(src => src.Author.Id))
+    .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.UserName))
+    .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.ArticleTags.Select(at => at.Tag.Name)))
+    .ForMember(dest => dest.TagsCount, opt => opt.MapFrom(src => src.ArticleTags.Count))
+    .ForMember(dest => dest.CommentsCount, opt => opt.MapFrom(src => src.Comments.Count));
 
             // Mapping из DTO в сущность
             CreateMap<ArticleDto, Article>()
