@@ -127,7 +127,8 @@ namespace WebApi.Controllers
                 UpdatedAt = DateTime.UtcNow
             };
 
-            var result = await _commentService.UpdateAsync(dto);
+            var isPermissionEdit = User.IsInRole("Administrator") || User.IsInRole("Moderator");
+            var result = await _commentService.UpdateAsync(dto, isPermissionEdit);
 
             if (!result.Success)
                 return StatusCode(result.StatusCode, string.Join("\n", result.Errors));
@@ -146,7 +147,7 @@ namespace WebApi.Controllers
                 return Unauthorized("User not authenticated.");
 
             // Проверка, админ ли пользователь
-            var isAdmin = User.IsInRole("Admin");
+            var isAdmin = User.IsInRole("Administrator");
 
             var result = await _commentService.DeleteAsync(id, userId, isAdmin);
 

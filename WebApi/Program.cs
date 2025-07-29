@@ -53,7 +53,7 @@ builder.Services.AddIdentity<DAL.Entities.User, IdentityRole>(opts =>
 
 // Регистрируем сервис для работы с ролями, добавляем дефолтные роли (например, User, Administrator)
 builder.Services.AddScoped<IRoleService, RoleService>()
-    .AddIdentityRoles(RoleType.User, RoleType.Administrator);
+    .AddIdentityRoles(RoleType.User, RoleType.Administrator,RoleType.Moderator);
 
 // Регистрируем сервис для работы с пользователями, добавляем дефолтную роль User
 builder.Services.AddScoped<IUserService, UserService>()

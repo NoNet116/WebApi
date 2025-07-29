@@ -104,14 +104,14 @@ namespace BLL.Services
             return Result<IEnumerable<CommentDto>>.Ok(200, comments);
         }
 
-        public async Task<Result<CommentDto>> UpdateAsync(CommentDto dto)
+        public async Task<Result<CommentDto>> UpdateAsync(CommentDto dto, bool isPermissionEdit = false)
         {
             var comment = await _repository.GetByIdAsync(dto.Id);
             if (comment == null)
                 return Result<CommentDto>.Fail(404, "Комментарий не найден.");
 
-            if (comment.AuthorId != dto.AuthorId)
-                return Result<CommentDto>.Fail(403, "Вы не являетесь автором этого комментария.");
+            if (comment.AuthorId != dto.AuthorId && !isPermissionEdit)
+                return Result<CommentDto>.Fail(403, "не достаточно прав для редактирования");
 
             comment.Message = dto.Message;
             comment.UpdatedAt = DateTime.UtcNow;
@@ -122,14 +122,14 @@ namespace BLL.Services
             return Result<CommentDto>.Ok(200, updatedDto);
         }
 
-        public async Task<Result<string>> DeleteAsync(Guid commentId, string userId, bool isAdmin = false)
+        public async Task<Result<string>> DeleteAsync(Guid commentId, string userId, bool isPermissionEdit = false)
         {
             var comment = await _repository.GetByIdAsync(commentId);
             if (comment == null)
                 return Result<string>.Fail(404, "Комментарий не найден.");
 
             // Проверка прав: автор или админ
-            if (comment.AuthorId != userId && !isAdmin)
+            if (comment.AuthorId != userId && !isPermissionEdit)
                 return Result<string>.Fail(403, "Недостаточно прав для удаления комментария.");
 
             await _repository.DeleteAsync(comment);

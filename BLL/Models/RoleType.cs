@@ -6,7 +6,8 @@ namespace BLL.Models
     {
         [Description("User")]
         User,
-
+        [Description("Moderator")]
+        Moderator,
         [Description("Administrator")]
         Administrator
     }

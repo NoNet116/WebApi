@@ -23,6 +23,10 @@ namespace BLL.Services
             _logger = logger;
         }
 
+        private static bool RoleExists(string roleName)
+        {
+            return Enum.TryParse<RoleType>(roleName, true, out _);
+        }
         public async Task<Result<RoleDto>> Create(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -65,8 +69,9 @@ namespace BLL.Services
                 return Result<bool>.Fail(401, NOTFOUNDBYID);
             }
 
-            if (role.Name == RoleType.User.ToString() || role.Name == RoleType.Administrator.ToString())
+            if (RoleExists(role.Name))
             {
+                
                 return Result<bool>.Fail(418, "Нельзя удалять роль по умолчанию");
             }
 
@@ -130,9 +135,12 @@ namespace BLL.Services
             {
                 var msg = "Имя роли не может быть пустым.";
                 _logger.LogError(msg);
-                return Result<RoleDto>.Fail(400, msg); ;
+                return Result<RoleDto>.Fail(400, msg);
             }
-
+            if (RoleExists(role.Name))
+            {
+                return Result<RoleDto>.Fail(400, "Роль по умолчанию не редактируется");
+            }
             var oldname = role.Name;
             role.Name = roleDto.Name;
             var result = await _roleManager.UpdateAsync(role);

@@ -3,7 +3,6 @@ using BLL.ModelsDto;
 using WebApi.ViewModels;
 using WebApi.ViewModels.Articles;
 using WebApi.ViewModels.Tags;
-using WebApi.ViewModels.Comments;
 
 namespace WebApi.Mapper
 {
