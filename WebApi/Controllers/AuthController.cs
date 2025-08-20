@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using WebApi.ViewModels; // Путь к моделям запроса
+using WebApi.ViewModels; 
 
 namespace WebApi.Controllers
 {
@@ -23,18 +23,35 @@ namespace WebApi.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
                 return Unauthorized("Invalid email or password");
 
-            var result = await _signInManager.PasswordSignInAsync(user, model.Password, isPersistent: true, lockoutOnFailure: false);
+            var result = await _signInManager.PasswordSignInAsync(
+                user,
+                model.Password,
+                isPersistent: true,
+                lockoutOnFailure: false
+            );
 
             if (result.Succeeded)
             {
-                return Ok("Login successful");
+                return Ok(new
+                {
+                    Message = "Login successful",
+                    User = new { user.UserName, user.Email }
+                });
             }
-            return Unauthorized("Invalid username or password");
+
+            if (result.IsLockedOut)
+                return Unauthorized("User is locked out");
+
+            return Unauthorized("Invalid email or password");
         }
+
 
         [Authorize]
         [HttpPost("logout")]
@@ -44,7 +61,7 @@ namespace WebApi.Controllers
             return Ok("Logged out successfully");
         }
 
-        [Authorize]
+        
         [HttpGet("profile")]
         public async Task<IActionResult> Profile()
         {
