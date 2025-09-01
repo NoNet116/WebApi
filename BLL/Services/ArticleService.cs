@@ -345,5 +345,26 @@ namespace BLL.Services
                 return Result<IEnumerable<ArticleDto>>.Fail(500, ex.Message);
             }
         }
+
+        public async  Task<Result<bool>> DeleteAsync(int id)
+        {
+            try
+            {
+                var article = await _articleRepository.GetByIdAsync(id);
+
+                if (article == null)
+                {
+                    return Result<bool>.Fail(404, "Статья не найдена.");
+                }
+
+                await _articleRepository.DeleteAsync(article);
+
+                return Result<bool>.Ok(200, true);
+            }
+            catch (Exception ex)
+            {
+                return Result<bool>.Fail(500, ex.Message);
+            }
+        }
     }
 }

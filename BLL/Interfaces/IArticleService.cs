@@ -14,5 +14,8 @@ namespace BLL.Interfaces
 
         Task<ArticleDto> FindByIdAsync(int id);
         Task<Result<IEnumerable<ArticleDto>>> GetByAuthorIdAsync(string authorId);
+
+        Task<Result<bool>> DeleteAsync(int id);
+        
     }
 }

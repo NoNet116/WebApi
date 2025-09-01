@@ -97,5 +97,23 @@ namespace WebApi.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var result = await _articleService.DeleteAsync(id);
+
+                if (result.Errors != null)
+                    return StatusCode(result.StatusCode, result.Errors);
+
+                return StatusCode(result.StatusCode, result?.Data);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.InnerException);
+            }
+        }
     }
 }

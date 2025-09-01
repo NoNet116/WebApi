@@ -74,7 +74,10 @@ namespace WebApi.Controllers
             if (!result.Success)
                 return StatusCode(result.StatusCode, string.Join("\r\n", result.Errors));
 
-            var artId = result.Data.FirstOrDefault()?.ArticleId ?? model.ArticleId;
+            if (result.DataIsNull)
+                return NoContent();
+
+            var artId = result.Data!.FirstOrDefault()?.ArticleId ?? model.ArticleId;
 
             var comments = new CommentViewModel
             {
