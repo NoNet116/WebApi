@@ -42,14 +42,28 @@ namespace BLL.Services
         public async Task<UserDto> GetUserByIdAsync(string id)
         {
             var userEntity = await _userManager.FindByIdAsync(id);
-            return _mapper.Map<UserDto>(userEntity);
+            var roles = await _userManager.GetRolesAsync(userEntity);
+            var dto = _mapper.Map<UserDto>(userEntity);
+            dto.Role = roles.FirstOrDefault();
+            return dto;
         }
 
         public async Task<Result<UserDto>> CreateUserAsync(UserDto userDto)
         {
             var user = _mapper.Map<User>(userDto);
 
-            var createResult = await _userManager.CreateAsync(user, userDto.Password);
+            Microsoft.AspNetCore.Identity.IdentityResult createResult;
+
+            try
+            {
+                createResult = await _userManager.CreateAsync(user, userDto.Password);
+            }
+            catch (Exception ex)
+            {
+                // _logger.LogError(ex, "Ошибка при создании пользователя");
+                return Result<UserDto>.Fail(500, ex.InnerException.Message);
+            }
+
 
             if (!createResult.Succeeded)
                 return Result<UserDto>.Fail(500, createResult.Errors.Select(e => $"{e.Code}. {e.Description}").ToArray());
@@ -141,5 +155,64 @@ namespace BLL.Services
 
             return Result<string>.Ok(200, "Роль пользователя успешно обновлена");
         }
+
+        public async Task<Result<UserDto>> EditUserAsync(string id, UserDto dto)
+        {
+            var userEntity = await _userManager.FindByIdAsync(id);
+
+            if (userEntity == null)
+                return Result<UserDto>.Fail(404, $"Пользователь с ID {id} не найден.");
+
+            // Обновляем поля пользователя
+            userEntity.FirstName = dto.FirstName;
+            userEntity.LastName = dto.LastName;
+            userEntity.FatherName = dto.FatherName;
+            userEntity.UserName = dto.UserName;
+            userEntity.Email = dto.Email;
+            userEntity.BirthDate = dto.BirthDate;
+            userEntity.Image = dto.ProfileImage;
+
+            // Если нужно обновить пароль
+            if (!string.IsNullOrWhiteSpace(dto.Password))
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(userEntity);
+                var passwordResult = await _userManager.ResetPasswordAsync(userEntity, token, dto.Password);
+
+                if (!passwordResult.Succeeded)
+                    return Result<UserDto>.Fail(500,"Ошибка при обновлении пароля: " +
+                        string.Join(", ", passwordResult.Errors.Select(e => e.Description)));
+            }
+
+            // Сохраняем изменения
+            var updateResult = await _userManager.UpdateAsync(userEntity);
+            if (!updateResult.Succeeded)
+                return Result<UserDto>.Fail(500,"Ошибка при обновлении пользователя: " +
+                    string.Join(", ", updateResult.Errors.Select(e => e.Description)));
+
+            // Обновляем роль, если передана
+            if (!string.IsNullOrEmpty(dto.Role))
+            {
+                var currentRoles = await _userManager.GetRolesAsync(userEntity);
+                await _userManager.RemoveFromRolesAsync(userEntity, currentRoles);
+                await _userManager.AddToRoleAsync(userEntity, dto.Role);
+            }
+
+            // Возвращаем обновленные данные
+            var updatedDto = new UserDto
+            {
+                Id = userEntity.Id,
+                FirstName = userEntity.FirstName,
+                LastName = userEntity.LastName,
+                FatherName = userEntity.FatherName,
+                UserName = userEntity.UserName,
+                Email = userEntity.Email,
+                BirthDate = userEntity.BirthDate.Value,
+                ProfileImage = $"{userEntity.Image}",
+                Role = dto.Role
+            };
+
+            return Result<UserDto>.Ok(200,updatedDto);
+        }
+
     }
 }

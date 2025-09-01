@@ -19,6 +19,6 @@ namespace WebApi.ViewModels
         public DateOnly BirthDate { get; set; }
 
         [DataType(DataType.ImageUrl)]
-        public string ProfileImage { get; set; }
+        public string? ProfileImage { get; set; }
     }
 }

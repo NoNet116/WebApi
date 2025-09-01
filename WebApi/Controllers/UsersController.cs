@@ -147,5 +147,20 @@ namespace WebApi.Controllers
 
             return StatusCode(result.StatusCode, result.Data);
         }
+        
+        [HttpPut("{id}")]
+
+        public async Task<IActionResult> Edit(string id,[FromBody] UserViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _userService.EditUserAsync(id, _mapper.Map<UserDto>(model));
+
+            if (!result.Success)
+                return StatusCode(result.StatusCode, string.Join("\r\n", result.Errors));
+
+            return StatusCode(result.StatusCode, result.Data);
+        }
     }
 }

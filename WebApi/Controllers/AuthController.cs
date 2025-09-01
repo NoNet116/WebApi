@@ -36,14 +36,19 @@ namespace WebApi.Controllers
                 isPersistent: true,
                 lockoutOnFailure: false
             );
-
+           
             if (result.Succeeded)
             {
+                var role = await _userManager.GetRolesAsync(user);
+
                 return Ok(new
                 {
-                    Message = "Login successful",
-                    User = new { user.UserName, user.Email }
-                });
+                     user.UserName, 
+                     user.Email,
+                     user.Id,
+                     Role = role.FirstOrDefault()
+
+            });
             }
 
             if (result.IsLockedOut)

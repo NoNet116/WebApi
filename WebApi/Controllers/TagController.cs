@@ -49,6 +49,7 @@ namespace WebApi.Controllers
         [HttpGet("by-id/{id:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> FindById(Guid id)
+
         {
             var result = await _tagService.FindByIdAsync(id);
             return StatusCode(result.StatusCode, result);
@@ -69,13 +70,20 @@ namespace WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Update([FromBody] UpdateViewModel model)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            var dto = _mapper.Map<TagDto>(model);
-            var result = await _tagService.UpdateAsync(dto);
+                var dto = _mapper.Map<TagDto>(model);
+                var result = await _tagService.UpdateAsync(dto);
 
-            return StatusCode(result.StatusCode, result);
+                return StatusCode(result.StatusCode, result?.Data);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex?.InnerException?.Message);
+            }
         }
 
         #endregion Update Tag

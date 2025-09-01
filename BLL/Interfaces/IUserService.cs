@@ -13,5 +13,6 @@ namespace BLL.Interfaces
         Task<Result<bool>> DeleteUserAsync(string id);
 
         Task<Result<string>> EditUserRoleAsync(string id, string role);
+        Task<Result<UserDto>> EditUserAsync(string id, UserDto dto);
     }
 }

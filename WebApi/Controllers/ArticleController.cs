@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BLL;
 using BLL.Interfaces;
 using BLL.ModelsDto;
 using Microsoft.AspNet.Identity;
@@ -55,14 +56,17 @@ namespace WebApi.Controllers
         public async Task<IActionResult> FindByTitle(string? title)
         {
             var res = await _articleService.FindByTitleAsync(title);
-            return StatusCode(res.StatusCode, res);
+            return StatusCode(res.StatusCode, res?.Data);
         }
 
-        [HttpGet("{count}")]
-        public async Task<IActionResult> Get(int count)
+        [HttpGet("{startIndex}/{count}")]
+        public async Task<IActionResult> Get(int startIndex = 0, int count = 10)
         {
-            var res = await _articleService.GetLatestArticlesAsync(count);
-            return StatusCode(res.StatusCode, res);
+            (int startIndex, int count) item;
+            item.startIndex = startIndex;
+            item.count = count;
+            var res = await _articleService.GetLatestArticlesAsync(item);
+            return StatusCode(res.StatusCode, res.Data);
         }
 
         [HttpGet("author/{authorId}")]
@@ -74,6 +78,24 @@ namespace WebApi.Controllers
                 return StatusCode(result.StatusCode, string.Join("\r\n", result.Errors));
 
             return StatusCode(result.StatusCode, result.Data);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> FindById(int id)
+        {
+            if (id <= 0)
+                return BadRequest("Invalid ID");
+
+            try
+            {
+                var result = await _articleService.FindByIdAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error finding article by id {Id}", id);
+                return StatusCode(500, "Internal server error");
+            }
         }
     }
 }

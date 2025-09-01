@@ -55,10 +55,10 @@ namespace BLL.Services
                     var existingTags = await _tagService.GetExistingTagsAsync(dto.Tags);
                     var notFoundTags = dto.Tags.Except(existingTags.Select(t => t.Name));
 
-                    if (notFoundTags.Any())
-                        return Result<ArticleDto>.Fail(404, $"Теги не найдены: {string.Join(", ", notFoundTags)}");
-
-                    tags.AddRange(existingTags);
+                    /*if (notFoundTags.Any())
+                        return Result<ArticleDto>.Fail(404, $"Теги не найдены: {string.Join(", ", notFoundTags)}");*/
+                    if(existingTags.Any())
+                        tags.AddRange(existingTags);
                 }
 
                 // Маппинг и сохранение
@@ -277,7 +277,7 @@ namespace BLL.Services
         }
 
         #endregion Find
-        public async Task<Result<IEnumerable<ArticleDto>>> GetLatestArticlesAsync(int count = 10)
+        public async Task<Result<IEnumerable<ArticleDto>>> GetLatestArticlesAsync((int startIndex, int count) item)
         {
             try
             {
@@ -286,7 +286,8 @@ namespace BLL.Services
                     .Include(a => a.ArticleTags).ThenInclude(at => at.Tag)
                     .Include(a => a.Comments)
                     .OrderByDescending(a => a.CreatedAt)
-                    .Take(count)
+                    .Skip(item.startIndex)
+                    .Take(item.count)
                     .ToListAsync();
 
                 var result = articles.Select(a => new ArticleDto
@@ -297,7 +298,7 @@ namespace BLL.Services
                     CreatedAt = a.CreatedAt,
                     UpdatedAt = a.UpdatedAt,
                     AuthorId = a.AuthorId,
-                    AuthorName = a.Author.UserName,
+                    AuthorName = a.Author.UserName!,
                     TagsCount = a.ArticleTags.Count,
                     CommentsCount = a.Comments.Count,
                     Tags = (List<string>)a.ArticleTags.Select(at => at.Tag.Name).ToList(),
