@@ -136,7 +136,7 @@ namespace WebApi.Controllers
             if (!result.Success)
                 return StatusCode(result.StatusCode, string.Join("\n", result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result);
         }
 
         [HttpDelete("{id:Guid}")]

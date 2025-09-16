@@ -5,6 +5,7 @@ using DAL.Entities;
 using DAL.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 
 namespace BLL.Services
 {
@@ -200,6 +201,7 @@ namespace BLL.Services
         {
             var query = _articleRepository.GetQueryable()
         .Include(a => a.Author)
+        .Include(a => a.ArticleTags).ThenInclude(at => at.Tag)
         .Where(a => a.Id == id)
         .Select(a => new ArticleDto
         {
@@ -209,8 +211,8 @@ namespace BLL.Services
             CreatedAt = a.CreatedAt,
             UpdatedAt = a.UpdatedAt,
             AuthorId = a.AuthorId,
-            AuthorName = a.Author.UserName
-            // Добавь при необходимости другие свойства
+            AuthorName = a.Author.UserName,
+            Tags = a.ArticleTags.Select(at => at.Tag.Name).ToList()
         });
 
             return await query.FirstOrDefaultAsync();
@@ -220,6 +222,7 @@ namespace BLL.Services
         {
             var query = _articleRepository.GetQueryable()
             .Include(a => a.Author)
+            .Include(a => a.ArticleTags).ThenInclude(at => at.Tag)
             .Select(a => new ArticleDto
             {
                 Id = a.Id,
@@ -228,8 +231,10 @@ namespace BLL.Services
                 CreatedAt = a.CreatedAt,
                 UpdatedAt = a.UpdatedAt,
                 AuthorId = a.AuthorId,
-                AuthorName = a.Author.UserName
-                // Остальные свойства
+                AuthorName = a.Author.UserName!,
+                TagsCount = a.ArticleTags.Count,
+                CommentsCount = a.Comments.Count,
+                Tags = a.ArticleTags.Select(at => at.Tag.Name).ToList(),
             });
 
             if (!string.IsNullOrEmpty(title))
@@ -277,6 +282,7 @@ namespace BLL.Services
         }
 
         #endregion Find
+
         public async Task<Result<IEnumerable<ArticleDto>>> GetLatestArticlesAsync((int startIndex, int count) item)
         {
             try
@@ -284,35 +290,32 @@ namespace BLL.Services
                 var articles = await _articleRepository.GetQueryable()
                     .Include(a => a.Author)
                     .Include(a => a.ArticleTags).ThenInclude(at => at.Tag)
-                    .Include(a => a.Comments)
                     .OrderByDescending(a => a.CreatedAt)
                     .Skip(item.startIndex)
                     .Take(item.count)
+                    .Select(a => new ArticleDto
+                    {
+                        Id = a.Id,
+                        Title = a.Title,
+                        Content = a.Content,
+                        CreatedAt = a.CreatedAt,
+                        UpdatedAt = a.UpdatedAt,
+                        AuthorId = a.AuthorId,
+                        AuthorName = a.Author.UserName!,
+                        TagsCount = a.ArticleTags.Count,
+                        CommentsCount = a.Comments.Count, 
+                        Tags = a.ArticleTags.Select(at => at.Tag.Name).ToList(),
+                    })
                     .ToListAsync();
 
-                var result = articles.Select(a => new ArticleDto
-                {
-                    Id = a.Id,
-                    Title = a.Title,
-                    Content = a.Content,
-                    CreatedAt = a.CreatedAt,
-                    UpdatedAt = a.UpdatedAt,
-                    AuthorId = a.AuthorId,
-                    AuthorName = a.Author.UserName!,
-                    TagsCount = a.ArticleTags.Count,
-                    CommentsCount = a.Comments.Count,
-                    Tags = (List<string>)a.ArticleTags.Select(at => at.Tag.Name).ToList(),
-                });
-
-                return Result<IEnumerable<ArticleDto>>.Ok(200, result);
+                return Result<IEnumerable<ArticleDto>>.Ok(200, articles);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка при получении последних статей");
-                return Result<IEnumerable<ArticleDto>>.Fail(500, "Не удалось загрузить статью.");
+                return Result<IEnumerable<ArticleDto>>.Fail(500, "Не удалось загрузить статьи.");
             }
         }
-        
         public async Task<Result<IEnumerable<ArticleDto>>> GetByAuthorIdAsync(string authorId)
         {
             try
@@ -346,25 +349,90 @@ namespace BLL.Services
             }
         }
 
-        public async  Task<Result<bool>> DeleteAsync(int id)
+        public async Task<Result<bool>> DeleteAsync(int id, string userId)
         {
             try
             {
-                var article = await _articleRepository.GetByIdAsync(id);
+                var user = await _userService.GetUserByIdAsync(userId);
+                if (user == null)
+                {
+                    return Result<bool>.Fail(404, "Пользователь не найден.");
+                }
 
+                var article = await _articleRepository.GetByIdAsync(id);
                 if (article == null)
                 {
                     return Result<bool>.Fail(404, "Статья не найдена.");
                 }
 
-                await _articleRepository.DeleteAsync(article);
+                var isAuthor = article.AuthorId == user.Id;
+                var isAdmin = user.Role == "Administrator";
 
+                if (!isAuthor && !isAdmin) 
+                {
+                    return Result<bool>.Fail(403, "Недостаточно прав. Только автор или администратор может удалять статьи.");
+                }
+
+                await _articleRepository.DeleteAsync(article);
                 return Result<bool>.Ok(200, true);
             }
             catch (Exception ex)
             {
                 return Result<bool>.Fail(500, ex.Message);
             }
+        }
+
+        public async Task<Result<ArticleDto>> Update(ArticleDto dto, string editorId)
+        {
+            var articleEntity = await _articleRepository.FirstOrDefaultAsync(at => at.Id == dto.Id);
+            if (articleEntity == null)
+                return Result<ArticleDto>.Fail(404,"Статья не найдена.");
+            var editorUser = await _userService.GetUserByIdAsync(editorId);
+
+            if (editorUser == null)
+            {
+                return Result<ArticleDto>.Fail(404, "Пользователь не найден.");
+            }
+            string[] roles = ["Administrator", "Moderator"];
+
+            if(editorUser.Id != articleEntity.AuthorId || !roles.Contains(editorUser.Role))
+            {
+                return Result<ArticleDto>
+                    .Fail(400, $"Права редактирования только у владельца или пользователй с ролью {string.Join(", ",roles)}.");
+            }
+
+            try
+            {
+
+                var tags = new List<Tag>();
+                if (dto.Tags != null && dto.Tags.Any())
+                {
+                    var existingTags = await _tagService.GetExistingTagsAsync(dto.Tags);
+                    var notFoundTags = dto.Tags.Except(existingTags.Select(t => t.Name));
+
+                    if (existingTags.Any())
+                        tags.AddRange(existingTags);
+                }
+                var t = tags.Select(x=>x);
+                articleEntity.Title = dto.Title;
+                articleEntity.Content = dto.Content;
+                articleEntity.UpdatedAt = DateTime.UtcNow;
+                articleEntity.ArticleTags = tags.Select(t => new ArticleTags { TagId = t.Id }).ToList();
+
+
+
+                await _articleRepository.UpdateAsync(articleEntity);
+
+                var article = await FindByIdAsync(articleEntity.Id);
+                
+                return Result<ArticleDto>.Ok(200, article);
+
+            }
+            catch (Exception ex)
+            {
+                return Result<ArticleDto>.Fail(500, ex.InnerException?.Message ?? ex.Message);
+            }
+            
         }
     }
 }

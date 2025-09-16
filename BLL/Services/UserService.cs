@@ -42,6 +42,8 @@ namespace BLL.Services
         public async Task<UserDto> GetUserByIdAsync(string id)
         {
             var userEntity = await _userManager.FindByIdAsync(id);
+            if (userEntity == null)
+                return null;
             var roles = await _userManager.GetRolesAsync(userEntity);
             var dto = _mapper.Map<UserDto>(userEntity);
             dto.Role = roles.FirstOrDefault();
@@ -192,9 +194,15 @@ namespace BLL.Services
             // Обновляем роль, если передана
             if (!string.IsNullOrEmpty(dto.Role))
             {
-                var currentRoles = await _userManager.GetRolesAsync(userEntity);
-                await _userManager.RemoveFromRolesAsync(userEntity, currentRoles);
-                await _userManager.AddToRoleAsync(userEntity, dto.Role);
+                var roles = await _roleService.GetByNameAsync(dto.Role);
+                if (!roles.DataIsNull)
+                {
+                    var currentRoles = await _userManager.GetRolesAsync(userEntity);
+                    await _userManager.RemoveFromRolesAsync(userEntity, currentRoles);
+                    await _userManager.AddToRoleAsync(userEntity, dto.Role);
+                }
+                
+                               
             }
 
             // Возвращаем обновленные данные

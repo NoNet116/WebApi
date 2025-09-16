@@ -5,6 +5,7 @@ using BLL.ModelsDto;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using WebApi.ViewModels.Articles;
 
 namespace WebApi.Controllers
@@ -101,10 +102,18 @@ namespace WebApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
+            var currentUserId = base.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(currentUserId))
+                return Unauthorized();
+
+            var roles = User.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToList();
             try
             {
-                var result = await _articleService.DeleteAsync(id);
-
+                var result = await _articleService.DeleteAsync(id, currentUserId);
+                
                 if (result.Errors != null)
                     return StatusCode(result.StatusCode, result.Errors);
 
@@ -115,5 +124,36 @@ namespace WebApi.Controllers
                 return StatusCode(500, ex.InnerException);
             }
         }
+
+        [HttpPut("Edit")]
+        public async Task<IActionResult> Edit([FromBody] EditArticleViewModel model)
+        {
+            var editorId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(editorId))
+            {
+                return Unauthorized();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    Message = "Ошибки валидации",
+                    Errors = ModelState
+                .SelectMany(ms => ms.Value.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList()
+                });
+            }
+
+            var dto = _mapper.Map<ArticleDto>(model);
+            var result = await _articleService.Update(dto, editorId);
+            if (!result.Success)
+                return StatusCode(result.StatusCode, result.Errors);
+           
+            return StatusCode(result.StatusCode, result.Data);
+
+        }
+
     }
 }

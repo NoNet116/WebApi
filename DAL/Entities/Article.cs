@@ -12,7 +12,7 @@
         public string AuthorId { get; set; } = default!;
         public User Author { get; set; } = default!;
 
-        public ICollection<ArticleTags> ArticleTags { get; set; } = new List<ArticleTags>();
-        public ICollection<ArticleTags> Comments { get; set; } = new List<ArticleTags>();
+        public List<ArticleTags> ArticleTags { get; set; } = new List<ArticleTags>();
+        public List<Comment> Comments { get; set; } = new List<Comment>();
     }
 }

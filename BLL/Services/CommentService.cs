@@ -48,9 +48,8 @@ namespace BLL.Services
             var entity = _mapper.Map<Comment>(comment);
             entity.AuthorId = comment.AuthorId;
             entity.ArticleId = comment.ArticleId;
-
             await _repository.AddAsync(entity);
-
+            comment.Id = entity.Id;
             return Result<CommentDto>.Ok(201, comment);
         }
 

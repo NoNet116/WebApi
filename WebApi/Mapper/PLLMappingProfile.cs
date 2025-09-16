@@ -36,6 +36,7 @@ namespace WebApi.Mapper
         private void ArticleMap()
         {
             CreateMap<CreateArticleViewModel, ArticleDto>().ReverseMap();
+            CreateMap<EditArticleViewModel, ArticleDto>().ReverseMap();
         }
         private void CommentMap()
         {
