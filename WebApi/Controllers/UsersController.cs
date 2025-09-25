@@ -96,10 +96,7 @@ namespace WebApi.Controllers
 
             var createdUser = CreateAdmin.Data!;
 
-            return Ok(
-                $"Username: admin\r\nEmail: admin@e.ru\r\nPassword: {defaultpass}"
-
-            );
+            return Ok(new {model.Email, model.Password });
         }
 
         [HttpDelete("{id}")]
